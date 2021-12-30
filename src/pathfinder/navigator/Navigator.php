@@ -5,26 +5,26 @@ declare(strict_types=1);
 namespace pathfinder\navigator;
 
 use pathfinder\algorithm\astar\AStar;
-use pathfinder\pathpoint\PathPointManager;
 use pathfinder\pathresult\PathResult;
-use pathfinder\queue\ValidatorQueue;
+use pocketmine\block\Block;
 use pocketmine\block\Slab;
+use pocketmine\block\Stair;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
-use pocketmine\Server;
-use pocketmine\world\format\SubChunk;
+use pocketmine\world\particle\HappyVillagerParticle;
 use function atan2;
 use function cos;
 use function count;
 use function deg2rad;
 use function intval;
-use function reset;
 use function sin;
 
 class Navigator {
     protected Entity $entity;
 
     protected float $speed = 0.3;
+    protected float $gravity = 0.08;
 
     protected ?Vector3 $targetVector3 = null;
     protected ?PathResult $pathResult = null;
@@ -36,13 +36,13 @@ class Navigator {
 
     protected ?Vector3 $lastVector3 = null;
 
-    protected ?Entity $targetEntity = null;
+    protected ?Living $targetEntity = null;
 
-    public function __construct(Entity $entity){
+    public function __construct(Living $entity){
         $this->entity = $entity;
     }
 
-    public function getEntity(): Entity{
+    public function getEntity(): Living{
         return $this->entity;
     }
 
@@ -83,12 +83,7 @@ class Navigator {
             if($this->targetEntity !== null) {
                 $position = $this->targetEntity->getPosition();
                 if(!$position->world->isInWorld(intval($position->x), intval($position->y), intval($position->z))) return;
-                if(PathPointManager::getPathPointByPosition($position) === null) {
-                    for($y = $position->getFloorY(); $y > 0; $y--) {
-                        $position->y = $y;
-                        if(PathPointManager::getPathPointByPosition($position) !== null) break;
-                    }
-                }
+                $position = $position->world->getSafeSpawn($position);
                 if($this->targetVector3 === null || $this->targetVector3->distanceSquared($position) > 1) {
                     $this->setTargetVector3($position);
                 }
@@ -104,14 +99,14 @@ class Navigator {
             $aStar->start();
             $this->pathResult = $aStar->getPathResult();
             if($this->pathResult === null) return;
-            $this->index = (count($this->pathResult->getPathPoints()) - 1);
+            $this->index = (count($this->pathResult->getPathPoints()) - 2);
         }
         if($this->pathResult === null) return;
 
         $pathPoint = $this->pathResult->getPathPoint($this->index);
         if($pathPoint === null) return;
 
-        if($location->withComponents(null, 0, null)->distanceSquared($pathPoint->withComponents(null, 0, null)) <= 0.223) {
+        if($location->withComponents(null, 0, null)->distanceSquared($pathPoint->withComponents(null, 0, null)) <= 0.2) {
             $pathPoint = $this->pathResult->getPathPoint(--$this->index);
             if($pathPoint === null){
                 $this->setTargetVector3($this->getTargetVector3());
@@ -139,10 +134,15 @@ class Navigator {
 
                 $lastPathPoint = $this->pathResult->getPathPoint($this->index + 1);
                 if($lastPathPoint !== null) {
-                    $isSlab = $location->world->getBlock($location) instanceof Slab;
-                    if($this->entity->isCollidedHorizontally && ($isSlab || ($pathPoint->y - $lastPathPoint->y) > 0.5)){
-                        $motion->y = ($isSlab ? 0.35 : 0.5);
-                        $this->jumpTicks = ($isSlab ? 3 : 5);
+                    if($this->entity->isCollidedHorizontally){
+                        $block = $location->getWorld()->getBlock($location);
+                        if($block instanceof Slab || $block instanceof Stair) {
+                            $motion->y = 0.3 + $this->gravity;
+                            $this->jumpTicks = 3;
+                        } else {
+                            $motion->y = 0.42 + $this->gravity;
+                            $this->jumpTicks = 5;
+                        }
                     }
                 }
                 $this->entity->setMotion($motion);
@@ -154,9 +154,7 @@ class Navigator {
             }
         }
         if($this->lastVector3 !== null && $this->lastVector3->x === $location->x && $this->lastVector3->z === $location->z) {
-            if(++$this->stuckTicks === 20){
-                ValidatorQueue::queueChunkValidation($location->getFloorX() >> SubChunk::COORD_BIT_SIZE, $location->getFloorZ() >> SubChunk::COORD_BIT_SIZE, $location->getWorld());
-            } elseif($this->stuckTicks > 40) {
+            if(++$this->stuckTicks >= 20){
                 $this->setTargetVector3($this->getTargetVector3());
                 $this->stuckTicks = 0;
             }

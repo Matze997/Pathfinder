@@ -19,7 +19,6 @@ use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
 use pocketmine\world\Position;
-use pocketmine\world\World;
 use function array_key_first;
 use function floatval;
 
@@ -46,22 +45,12 @@ class TestCommand extends Command {
 
         switch($args[0] ?? "") {
             case "1": {
-                if(PathPointManager::getPathPointByPosition($position) === null) {
-                    $sender->sendMessage("No path point found!");
-                    $player->sendMessage("No path point found!");
-                    return;
-                }
                 $this->positions[1] = $position;
                 $sender->sendMessage("First position set.");
                 $player->sendMessage("First position set.");
                 break;
             }
             case "2": {
-                if(PathPointManager::getPathPointByPosition($position) === null) {
-                    $sender->sendMessage("No path point found!");
-                    $player->sendMessage("No path point found!");
-                    return;
-                }
                 $this->positions[2] = $position;
                 $sender->sendMessage("Second position set.");
                 $player->sendMessage("Second position set.");
@@ -102,15 +91,6 @@ class TestCommand extends Command {
                 $this->timeout = $timeout;
                 $sender->sendMessage("Set timeout to ".$timeout." seconds");
                 $player->sendMessage("Set timeout to ".$timeout." seconds");
-                break;
-            }
-            case "reload": {
-                foreach($player->getWorld()->getLoadedChunks() as $hash => $chunk) {
-                    World::getXZ($hash, $chunkX, $chunkZ);
-                    ValidatorQueue::queueChunkValidation($chunkX, $chunkZ, $player->getWorld());
-                }
-                $sender->sendMessage("Reloading all chunks...");
-                $player->sendMessage("Reloading all chunks...");
                 break;
             }
             case "entity": {

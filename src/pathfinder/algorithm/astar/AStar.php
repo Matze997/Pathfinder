@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace pathfinder\algorithm\astar;
 
 use pathfinder\algorithm\Algorithm;
-use pathfinder\pathpoint\PathPointManager;
+use pathfinder\cost\CostCalculator;
+use pathfinder\pathpoint\PathPoint;
 use pathfinder\pathresult\PathResult;
+use pocketmine\block\BaseRail;
+use pocketmine\block\Block;
+use pocketmine\block\Lava;
+use pocketmine\block\Slab;
+use pocketmine\block\Stair;
 use pocketmine\math\Vector3;
-use pocketmine\world\Position;
+use function abs;
 use function array_key_first;
 use function asort;
+use function ceil;
 
 class AStar extends Algorithm {
     public const SIDES = [
@@ -31,12 +38,16 @@ class AStar extends Algorithm {
     private array $closedList = [];
 
     protected function run(): ?PathResult{
-        $axisAlignedBB = $this->getAxisAlignedBB();
         $world = $this->getWorld();
 
         $startNode = Node::fromVector3($this->startVector3);
         $startNode->setG(0.0);
         $startNode->setH($this->calculateHCost($startNode));
+
+        $startBlock = $world->getBlock($startNode);
+        if($startBlock instanceof Slab || $startBlock instanceof Stair) {
+            $startNode->y++;
+        }
 
         $targetNode = Node::fromVector3($this->targetVector3);
 
@@ -54,38 +65,42 @@ class AStar extends Algorithm {
                 $targetNode->setParentNode($currentNode);
                 break;
             }
-            $currentPathPoint = PathPointManager::getPathPointByPosition(Position::fromObject($currentNode, $world));
-            if($currentPathPoint === null){
-                for($y = -$this->getFallDistance(); $y <= $this->getJumpHeight(); $y++) {
-                    $currentPathPoint = PathPointManager::getPathPointByPosition(Position::fromObject($currentNode->add(0, $y, 0), $world));
-                    if($currentPathPoint !== null){
-                        $currentNode->y = $currentPathPoint->y;
-                        break;
-                    }
-                }
-                if($currentPathPoint === null) break;
-            }
+
             foreach(self::SIDES as $SIDE) {
                 $side = $currentNode->add($SIDE[0], 0, $SIDE[1]);
-                $sidePathPoint = PathPointManager::getPathPointByPosition(Position::fromObject($side, $world));
-
-                if($sidePathPoint === null){
+                if(!$this->isSafeToStandAt($side)){
                     if($SIDE[0] !== 0 && $SIDE[1] !== 0) continue;
-                    for($y = -$this->getFallDistance(); $y <= $this->getJumpHeight(); $y++) {
-                        $sidePathPoint = PathPointManager::getPathPointByPosition(Position::fromObject($side->add(0, $y, 0), $world));
-                        if($sidePathPoint !== null && $sidePathPoint->isCollisionFreeToStand($world, $axisAlignedBB)) break;
+
+                    //Jump Height Check
+                    $success = false;
+                    for($y = 0; $y <= $this->getJumpHeight(); ++$y) {
+                        if(!$this->isSafeToStandAt($side->add(0, $y, 0))) continue;
+                        $side->y += $y;
+                        $success = true;
+                        break;
                     }
-                    if($sidePathPoint === null) continue;
+                    if(!$success) {
+                        //Fall Distance Check
+                        $success = false;
+                        for($y = 0; $y <= $this->getFallDistance(); ++$y) {
+                            if(!$this->isSafeToStandAt($side->subtract(0, $y, 0))) continue;
+                            $side->y -= $y;
+                            $success = true;
+                            break;
+                        }
+                        if(!$success) continue;
+                    }
                 }
-                $sideNode = Node::fromVector3($sidePathPoint);
-                if(isset($this->closedList[$sideNode->getHash()]) || !$sidePathPoint->isCollisionFreeToStand($world, $axisAlignedBB)) {
+
+                $sideNode = Node::fromVector3($side);
+                if(isset($this->closedList[$sideNode->getHash()])) {
                     continue;
                 }
 
-                $cost = $sidePathPoint->getCost();
+                $cost = CostCalculator::getCost($world->getBlock($side->subtract(0, 1, 0))->getFullId());
                 if(!isset($this->openList[$sideNode->getHash()]) || $currentNode->getG() + $cost < $sideNode->getG()) {
                     $sideNode->setG($currentNode->getG() + $cost);
-                    $sideNode->setH($this->calculateHCost($sidePathPoint));
+                    $sideNode->setH($this->calculateHCost($side));
                     $sideNode->setParentNode($currentNode);
                     if(!isset($this->openList[$sideNode->getHash()])) {
                         $this->openList[$sideNode->getHash()] = $sideNode;
@@ -104,9 +119,7 @@ class AStar extends Algorithm {
         while(true) {
             $node = $node->getParentNode();
             if($node instanceof Node) {
-                $pathPoint = PathPointManager::getPathPointByPosition(Position::fromObject($node, $world));
-                if($pathPoint === null) return null;
-                $pathResult->addPathPoint($pathPoint);
+                $pathResult->addPathPoint(new PathPoint($node->x, $node->y, $node->z));
                 continue;
             }
             break;
@@ -126,5 +139,21 @@ class AStar extends Algorithm {
     private function calculateHCost(Vector3 $pos): float{
         $targetPos = $this->getTargetVector3();
         return abs($pos->x - $targetPos->x) + abs($pos->y - $targetPos->y) + abs($pos->z - $targetPos->z);
+    }
+
+    private function isBlockEmpty(Block $block): bool {
+        return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
+    }
+
+    private function isSafeToStandAt(Vector3 $vector3): bool {
+        $world = $this->getWorld();
+        $block = $world->getBlock($vector3->subtract(0, 1, 0));
+        if(!$block->isSolid() && !$block instanceof Slab && !$block instanceof Stair) return false;
+        $axisAlignedBB = $this->getAxisAlignedBB();
+        $height = ceil($axisAlignedBB->maxY - $axisAlignedBB->minY);
+        for($y = 0; $y <= $height; $y++) {
+            if(!$this->isBlockEmpty($world->getBlock($vector3->add(0, $y, 0)))) return false;
+        }
+        return true;
     }
 }
