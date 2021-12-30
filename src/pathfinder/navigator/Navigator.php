@@ -6,13 +6,11 @@ namespace pathfinder\navigator;
 
 use pathfinder\algorithm\astar\AStar;
 use pathfinder\pathresult\PathResult;
-use pocketmine\block\Block;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
-use pocketmine\world\particle\HappyVillagerParticle;
 use function atan2;
 use function cos;
 use function count;
