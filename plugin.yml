@@ -1,0 +1,5 @@
+name: Pathfinder
+version: 1.0.0
+api: 4.0.0
+main: pathfinder\Pathfinder
+author: Matze998
