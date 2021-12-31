@@ -8,6 +8,8 @@ use pathfinder\algorithm\astar\AStar;
 use pathfinder\pathresult\PathResult;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
+use pocketmine\block\utils\StairShape;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
@@ -81,7 +83,6 @@ class Navigator {
             if($this->targetEntity !== null) {
                 $position = $this->targetEntity->getPosition();
                 if(!$position->world->isInWorld(intval($position->x), intval($position->y), intval($position->z))) return;
-                $position = $position->world->getSafeSpawn($position);
                 if($this->targetVector3 === null || $this->targetVector3->distanceSquared($position) > 1) {
                     $this->setTargetVector3($position);
                 }
@@ -93,7 +94,7 @@ class Navigator {
         if($this->pathResult === null) {
             if(!$this->entity->isOnGround()) return;
             $aStar = new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox());
-            $aStar->setTimeout(0.05);
+            $aStar->setTimeout(0.01);
             $aStar->start();
             $this->pathResult = $aStar->getPathResult();
             if($this->pathResult === null) return;
@@ -134,12 +135,28 @@ class Navigator {
                 if($lastPathPoint !== null) {
                     if($this->entity->isCollidedHorizontally){
                         $block = $location->getWorld()->getBlock($location);
-                        if($block instanceof Slab || $block instanceof Stair) {
+                        $isFullBlock = false;
+                        if(!$block instanceof Slab && !$block instanceof Stair){
+                            $facing = $this->entity->getHorizontalFacing();
+                            $frontBlock = $location->getWorld()->getBlock($location->getSide($facing));
+                            if(!$frontBlock->canBeFlowedInto()) {
+                                if(!$frontBlock instanceof Slab && (!$frontBlock instanceof Stair || $frontBlock->isUpsideDown() || $frontBlock->getFacing() !== $facing)){
+                                    $motion->y = 0.42 + $this->gravity;
+                                    $this->jumpTicks = 5;
+                                    $isFullBlock = true;
+                                }
+                            } else  {
+                                $isFullBlock = true;
+                            }
+                        }
+                        if(!$isFullBlock) {
                             $motion->y = 0.3 + $this->gravity;
-                            $this->jumpTicks = 3;
-                        } else {
-                            $motion->y = 0.42 + $this->gravity;
-                            $this->jumpTicks = 5;
+                            $this->jumpTicks = 2;
+                        }
+
+                        if($motion->y > 0) {
+                            $motion->x /= 3;
+                            $motion->z /= 3;
                         }
                     }
                 }

@@ -37,6 +37,16 @@ class AStar extends Algorithm {
     /** @var Node[]  */
     private array $closedList = [];
 
+    private bool $onlyAcceptFullPath = false;
+
+    public function isOnlyAcceptFullPath(): bool{
+        return $this->onlyAcceptFullPath;
+    }
+
+    public function setOnlyAcceptFullPath(bool $onlyAcceptFullPath): void{
+        $this->onlyAcceptFullPath = $onlyAcceptFullPath;
+    }
+
     protected function run(): ?PathResult{
         $world = $this->getWorld();
 
@@ -53,6 +63,7 @@ class AStar extends Algorithm {
 
         $this->openList[$startNode->getHash()] = $startNode;
         $currentNode = null;
+        $bestNode = null;
         while($this->checkTimout()) {
             $key = $this->getLowestFCost();
             if($key === null) break;
@@ -68,6 +79,7 @@ class AStar extends Algorithm {
 
             foreach(self::SIDES as $SIDE) {
                 $side = $currentNode->add($SIDE[0], 0, $SIDE[1]);
+
                 if(!$this->isSafeToStandAt($side)){
                     if($SIDE[0] !== 0 && $SIDE[1] !== 0) continue;
 
@@ -97,7 +109,7 @@ class AStar extends Algorithm {
                     continue;
                 }
 
-                $cost = CostCalculator::getCost($world->getBlock($side->subtract(0, 1, 0))->getFullId());
+                $cost = CostCalculator::getCost($world->getBlock($side->subtract(0, 1, 0)));
                 if(!isset($this->openList[$sideNode->getHash()]) || $currentNode->getG() + $cost < $sideNode->getG()) {
                     $sideNode->setG($currentNode->getG() + $cost);
                     $sideNode->setH($this->calculateHCost($side));
@@ -105,15 +117,18 @@ class AStar extends Algorithm {
                     if(!isset($this->openList[$sideNode->getHash()])) {
                         $this->openList[$sideNode->getHash()] = $sideNode;
                     }
+
+                    if($bestNode === null || $bestNode->getH() > $sideNode->getH()) {
+                        $bestNode = $sideNode;
+                    }
                 }
             }
         }
         if($currentNode === null) return null;
         $node = $targetNode->getParentNode();
         if($node === null){
-            $key = $this->getLowestFCost();
-            if($key === null) return null;
-            $node = $this->openList[$key];
+            $node = $bestNode;
+            if($node === null || $this->isOnlyAcceptFullPath()) return null;
         }
         $pathResult = new PathResult($world, $this->startVector3, $this->targetVector3);
         while(true) {
