@@ -88,5 +88,7 @@ abstract class Algorithm {
         return $this->pathResult;
     }
 
-    protected function run(): ?PathResult {}
+    protected function run(): ?PathResult {
+        return null;
+    }
 }
