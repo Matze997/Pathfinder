@@ -18,6 +18,8 @@ class TestEntity extends Villager {
     public function __construct(Location $location, ?CompoundTag $nbt = null){
         $this->navigator = new Navigator($this);
         parent::__construct($location, $nbt);
+
+        $this->setScale(0.5);
     }
 
     public function onUpdate(int $currentTick): bool{
@@ -34,5 +36,9 @@ class TestEntity extends Villager {
     public function attack(EntityDamageEvent $source): void{
         parent::attack($source);
         $this->setHealth($this->getMaxHealth());
+
+        if($source->getCause() === EntityDamageEvent::CAUSE_FIRE) {
+            $this->flagForDespawn();
+        }
     }
 }
