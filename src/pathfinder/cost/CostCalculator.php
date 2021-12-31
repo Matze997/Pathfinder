@@ -13,6 +13,8 @@ class CostCalculator {
     private array $knownFullIds;
 
     public function __construct(){
+        //TODO: Improve this
+
         $this->knownFullIds = array_map(function(Block $block): int {
             return $block->getFullId();
         }, BlockFactory::getInstance()->getAllKnownStates());
