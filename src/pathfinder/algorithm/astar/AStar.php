@@ -55,8 +55,10 @@ class AStar extends Algorithm {
         $startNode->setH($this->calculateHCost($startNode));
 
         $startBlock = $world->getBlock($startNode);
+        $isInSlabOrStair = false;
         if($startBlock instanceof Slab || $startBlock instanceof Stair) {
             $startNode->y++;
+            $isInSlabOrStair = true;
         }
 
         $targetNode = Node::fromVector3($this->targetVector3);
@@ -85,7 +87,7 @@ class AStar extends Algorithm {
 
                     //Jump Height Check
                     $success = false;
-                    for($y = 0; $y <= $this->getJumpHeight(); ++$y) {
+                    for($y = 0; $y <= ($isInSlabOrStair ?( $this->getJumpHeight() - 1) : $this->getJumpHeight()); ++$y) {
                         if(!$this->isSafeToStandAt($side->add(0, $y, 0))) continue;
                         $side->y += $y;
                         $success = true;
@@ -123,6 +125,7 @@ class AStar extends Algorithm {
                     }
                 }
             }
+            $isInSlabOrStair = false;
         }
         if($currentNode === null) return null;
         $node = $targetNode->getParentNode();
@@ -157,6 +160,9 @@ class AStar extends Algorithm {
     }
 
     private function isBlockEmpty(Block $block): bool {
+        if(isset($this->blockValidators[$block->getId()])) {
+            return ($this->blockValidators[$block->getId()])($block);
+        }
         return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
     }
 

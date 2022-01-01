@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace pathfinder\algorithm;
 
+use Closure;
 use pathfinder\pathresult\PathResult;
+use pocketmine\block\Block;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\world\World;
@@ -26,6 +28,8 @@ abstract class Algorithm {
     protected AxisAlignedBB $axisAlignedBB;
 
     protected ?PathResult $pathResult = null;
+
+    protected array $blockValidators = [];
 
     public function __construct(World $world, Vector3 $startVector3, Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB = null){
         $this->world = $world;
@@ -90,5 +94,13 @@ abstract class Algorithm {
 
     protected function run(): ?PathResult {
         return null;
+    }
+
+    public function registerBlockValidator(Block $block, Closure $closure): void {
+        $this->blockValidators[$block->getId()] = $closure;
+    }
+
+    public function setBlockValidators(array $blockValidators): void{
+        $this->blockValidators = $blockValidators;
     }
 }
