@@ -1,4 +1,4 @@
-# -- A WIP [PocketMine](https://github.com/pmmp/PocketMine-MP) Pathfinder --
+# A WIP [PocketMine](https://github.com/pmmp/PocketMine-MP) Pathfinder
 
 ## Features:
 - AStar pathfinding
