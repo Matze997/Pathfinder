@@ -7,8 +7,6 @@ namespace pathfinder\pathresult;
 use pathfinder\pathpoint\PathPoint;
 use pocketmine\math\Vector3;
 use pocketmine\world\World;
-use function array_reverse;
-use function reset;
 
 class PathResult {
     private World $world;
@@ -57,11 +55,5 @@ class PathResult {
 
     public function getPathPoint(int $key): ?PathPoint {
         return $this->pathPoints[$key] ?? null;
-    }
-
-    public function finish(): self {
-        $this->pathPoints = array_reverse($this->pathPoints, true);
-        reset($this->pathPoints);
-        return $this;
     }
 }

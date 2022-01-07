@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace pathfinder;
 
-use pathfinder\command\TestCommand;
+use pathfinder\command\PathfinderCommand;
 use pathfinder\entity\TestEntity;
-use pathfinder\tool\DebugTool;
 use pocketmine\data\bedrock\EntityLegacyIds;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
@@ -21,12 +20,12 @@ class Pathfinder extends PluginBase {
     protected function onEnable(): void{
         self::$instance = $this;
 
-        Server::getInstance()->getCommandMap()->register("pathfinder", new TestCommand());
+        Server::getInstance()->getCommandMap()->register("pathfinder", new PathfinderCommand());
 
         EntityFactory::getInstance()->register(TestEntity::class, function(World $world, CompoundTag $nbt) : TestEntity{
             return new TestEntity(EntityDataHelper::parseLocation($nbt, $world), $nbt);
         }, ["TestEntity"], EntityLegacyIds::VILLAGER);
 
-        DebugTool::start();
+        //DebugTool::start();
     }
 }

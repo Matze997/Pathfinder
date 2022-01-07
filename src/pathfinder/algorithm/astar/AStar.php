@@ -8,16 +8,12 @@ use pathfinder\algorithm\Algorithm;
 use pathfinder\cost\CostCalculator;
 use pathfinder\pathpoint\PathPoint;
 use pathfinder\pathresult\PathResult;
-use pocketmine\block\BaseRail;
-use pocketmine\block\Block;
-use pocketmine\block\Lava;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\math\Vector3;
 use function abs;
 use function array_key_first;
 use function asort;
-use function ceil;
 
 class AStar extends Algorithm {
     public const SIDES = [
@@ -37,35 +33,30 @@ class AStar extends Algorithm {
     /** @var Node[]  */
     private array $closedList = [];
 
-    private bool $onlyAcceptFullPath = false;
+    private ?Node $startNode = null;
+    private ?Node $targetNode = null;
+    private ?Node $bestNode = null;
 
-    public function isOnlyAcceptFullPath(): bool{
-        return $this->onlyAcceptFullPath;
-    }
-
-    public function setOnlyAcceptFullPath(bool $onlyAcceptFullPath): void{
-        $this->onlyAcceptFullPath = $onlyAcceptFullPath;
-    }
-
-    protected function run(): ?PathResult{
+    protected function tick(): void{
         $world = $this->getWorld();
 
-        $startNode = Node::fromVector3($this->startVector3);
-        $startNode->setG(0.0);
-        $startNode->setH($this->calculateHCost($startNode));
-
-        $startBlock = $world->getBlock($startNode);
         $isInSlabOrStair = false;
-        if($startBlock instanceof Slab || $startBlock instanceof Stair) {
-            $startNode->y++;
-            $isInSlabOrStair = true;
+        if($this->startNode === null) {
+            $this->startNode = Node::fromVector3($this->startVector3);
+            $this->startNode->setG(0.0);
+            $this->startNode->setH($this->calculateHCost($this->startNode));
+
+            $this->targetNode = Node::fromVector3($this->targetVector3);
+
+            $this->openList[$this->startNode->getHash()] = $this->startNode;
+
+            $startBlock = $world->getBlock($this->startNode);
+            if($startBlock instanceof Slab || $startBlock instanceof Stair) {
+                $this->startNode->y++;
+                $isInSlabOrStair = true;
+            }
         }
 
-        $targetNode = Node::fromVector3($this->targetVector3);
-
-        $this->openList[$startNode->getHash()] = $startNode;
-        $currentNode = null;
-        $bestNode = null;
         while($this->checkTimout()) {
             $key = $this->getLowestFCost();
             if($key === null) break;
@@ -74,8 +65,9 @@ class AStar extends Algorithm {
             unset($this->openList[$currentNode->getHash()]);
             $this->closedList[$currentNode->getHash()] = $currentNode;
 
-            if($currentNode->getHash() === $targetNode->getHash()) {//Path found
-                $targetNode->setParentNode($currentNode);
+            if($currentNode->getHash() === $this->targetNode->getHash()) {//Path found
+                $this->targetNode->setParentNode($currentNode);
+                $this->stop();
                 break;
             }
 
@@ -119,21 +111,24 @@ class AStar extends Algorithm {
                     if(!isset($this->openList[$sideNode->getHash()])) {
                         $this->openList[$sideNode->getHash()] = $sideNode;
                     }
-
-                    if($bestNode === null || $bestNode->getH() > $sideNode->getH()) {
-                        $bestNode = $sideNode;
+                    if($this->bestNode === null || $this->bestNode->getH() > $sideNode->getH()) {
+                        $this->bestNode = $sideNode;
                     }
                 }
             }
             $isInSlabOrStair = false;
         }
-        if($currentNode === null) return null;
-        $node = $targetNode->getParentNode();
+    }
+
+    protected function finish(): void{
+        $node = $this->targetNode?->getParentNode();
         if($node === null){
-            $node = $bestNode;
-            if($node === null || $this->isOnlyAcceptFullPath()) return null;
+            $node = $this->bestNode;
+            if($node === null || $this->isOnlyAcceptFullPath()) {
+                return;
+            }
         }
-        $pathResult = new PathResult($world, $this->startVector3, $this->targetVector3);
+        $pathResult = new PathResult($this->getWorld(), $this->startVector3, $this->targetVector3);
         while(true) {
             $node = $node->getParentNode();
             if($node instanceof Node) {
@@ -142,7 +137,7 @@ class AStar extends Algorithm {
             }
             break;
         }
-        return $pathResult->finish();
+        $this->pathResult = $pathResult;
     }
 
     private function getLowestFCost(): ?int {
@@ -154,27 +149,8 @@ class AStar extends Algorithm {
         return array_key_first($openList);
     }
 
-    private function calculateHCost(Vector3 $pos): float{
-        $targetPos = $this->getTargetVector3();
-        return abs($pos->x - $targetPos->x) + abs($pos->y - $targetPos->y) + abs($pos->z - $targetPos->z);
-    }
-
-    private function isBlockEmpty(Block $block): bool {
-        if(isset($this->blockValidators[$block->getId()])) {
-            return ($this->blockValidators[$block->getId()])($block);
-        }
-        return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
-    }
-
-    private function isSafeToStandAt(Vector3 $vector3): bool {
-        $world = $this->getWorld();
-        $block = $world->getBlock($vector3->subtract(0, 1, 0));
-        if(!$block->isSolid() && !$block instanceof Slab && !$block instanceof Stair) return false;
-        $axisAlignedBB = $this->getAxisAlignedBB();
-        $height = ceil($axisAlignedBB->maxY - $axisAlignedBB->minY);
-        for($y = 0; $y <= $height; $y++) {
-            if(!$this->isBlockEmpty($world->getBlock($vector3->add(0, $y, 0)))) return false;
-        }
-        return true;
+    private function calculateHCost(Vector3 $vector3): float{
+        $targetVector3 = $this->getTargetVector3();
+        return abs($vector3->x - $targetVector3->x) + abs($vector3->y - $targetVector3->y) + abs($vector3->z - $targetVector3->z);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace pathfinder\navigator;
 
 use Closure;
+use pathfinder\algorithm\Algorithm;
 use pathfinder\algorithm\astar\AStar;
 use pathfinder\cost\CostCalculator;
 use pathfinder\cost\DefaultCostCalculator;
@@ -41,6 +42,8 @@ class Navigator {
     protected CostCalculator $costCalculator;
 
     protected ?Living $targetEntity = null;
+
+    protected ?Algorithm $algorithm = null;
 
     public function __construct(Living $entity, ?MovementHandler $movementHandler = null, ?CostCalculator $costCalculator = null){
         $this->entity = $entity;
@@ -110,6 +113,8 @@ class Navigator {
     }
 
     public function recalculatePath(): void {
+        $this->algorithm?->stop();
+        $this->algorithm = null;
         $this->pathResult = null;
         $this->lastPathPoint = null;
         $this->index = 0;
@@ -134,21 +139,28 @@ class Navigator {
         if($this->targetVector3 === null) return;
 
         $location = $this->entity->getLocation();
+        if($location->distanceSquared($this->targetVector3) <= 2) return;
         if($this->pathResult === null) {
-            $aStar = new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox());
-            $aStar->setBlockValidators($this->blockValidators);
-            $aStar->setTimeout(0.01);
-            $aStar->start();
-            $this->pathResult = $aStar->getPathResult();
-            if($this->pathResult === null) return;
-            $this->index = (count($this->pathResult->getPathPoints()) - 2);
+            if($this->algorithm === null || !$this->algorithm->isRunning()) {
+                $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox()))
+                    ->setBlockValidators($this->blockValidators)
+                    ->setTimeout(0.0005)
+                    ->setMaxTicks(200)
+                    ->whenDone(function(?PathResult $pathResult): void {
+                        $this->pathResult = $pathResult;
+                        if($pathResult === null) return;
+                        $count = count($this->pathResult->getPathPoints());
+                        $this->index = match (true) {
+                            ($count > 1) => ($count - 2),
+                            default => ($count - 1)
+                        };
+                    })->start();
+            }
+            return;
         }
-        if($this->pathResult === null) return;
-
         $pathPoint = $this->pathResult->getPathPoint($this->index);
         if($pathPoint === null){
             $this->lastPathPoint = null;
-            if($location->distanceSquared($this->targetVector3) <= 2) return;
             $this->recalculatePath();
             return;
         }
