@@ -35,7 +35,7 @@ $aStar->whenDone(function(?PathResult $pathResult): void {
 
 
 ## Important:
-This pathfinder is not the best, but you can help to improve it. If you see code places that can be improved or any method/variable names don't fit, please create a pull request with the respective changes.
+This pathfinder is not the best, but you can help to improve it. If you see code places that can be improved or any method/variable names that don't fit, please create a pull request with the respective changes.
 ### Thanks!
 
 ## Contact me:
