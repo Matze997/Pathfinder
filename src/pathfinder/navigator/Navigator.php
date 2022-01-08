@@ -146,7 +146,7 @@ class Navigator {
                     ->setBlockValidators($this->blockValidators)
                     ->setTimeout(0.0005)
                     ->setMaxTicks(200)
-                    ->whenDone(function(?PathResult $pathResult): void {
+                    ->then(function(?PathResult $pathResult): void {
                         $this->pathResult = $pathResult;
                         if($pathResult === null) return;
                         $count = count($this->pathResult->getPathPoints());

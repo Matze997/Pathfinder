@@ -62,7 +62,7 @@ class PathfinderCommand extends Command {
                 $world = $location->getWorld();
                 (new AStar($world, $this->positions[1], $this->positions[2], $player->getBoundingBox()))
                     ->setTimeout($this->timeout)
-                    ->whenDone(function(?PathResult $pathResult) use ($sender, $world): void {
+                    ->then(function(?PathResult $pathResult) use ($sender, $world): void {
                         if(($sender instanceof Player && !$sender->isConnected()) || !$world->isLoaded()) return;
                         if($pathResult === null) {
                             $sender->sendMessage("No path found!");

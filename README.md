@@ -24,7 +24,7 @@ $aStar->setJumpHeight(int $jumpHeight);
 
 3. Start and get pathfinding result
 ````php
-$aStar->whenDone(function(?PathResult $pathResult): void {
+$aStar->then(function(?PathResult $pathResult): void {
     if($pathResult === null) {
         echo "No path found!";
         return;

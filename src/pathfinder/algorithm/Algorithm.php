@@ -134,7 +134,7 @@ abstract class Algorithm {
      * $closure(?PathResult $pathResult) is called, when the path has been found or the pathfinder has a timeout
      *  => $pathResult is null, when no path was found
      */
-    public function whenDone(Closure $closure): self {
+    public function then(Closure $closure): self {
         $this->onCompletion = $closure;
         return $this;
     }
