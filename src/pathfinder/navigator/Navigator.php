@@ -139,7 +139,6 @@ class Navigator {
         if($this->targetVector3 === null) return;
 
         $location = $this->entity->getLocation();
-        if($location->distanceSquared($this->targetVector3) <= 2) return;
         if($this->pathResult === null) {
             if($this->algorithm === null || !$this->algorithm->isRunning()) {
                 $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox()))
