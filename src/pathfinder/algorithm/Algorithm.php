@@ -22,11 +22,6 @@ use function microtime;
 use function round;
 
 abstract class Algorithm {
-    protected World $world;
-
-    protected Vector3 $startVector3;
-    protected Vector3 $targetVector3;
-
     protected float $startTime;
     protected float $timeout = 0.05;
 
@@ -49,10 +44,7 @@ abstract class Algorithm {
 
     protected bool $running = false;
 
-    public function __construct(World $world, Vector3 $startVector3, Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB = null){
-        $this->world = $world;
-        $this->startVector3 = $startVector3;
-        $this->targetVector3 = $targetVector3;
+    public function __construct(protected World $world, protected Vector3 $startVector3, protected Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB = null){
         $this->axisAlignedBB = $axisAlignedBB ?? AxisAlignedBB::one();
     }
 
