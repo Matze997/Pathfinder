@@ -129,6 +129,7 @@ class AStar extends Algorithm {
             }
         }
         $pathResult = new PathResult($this->getWorld(), $this->startVector3, $this->targetVector3);
+        $pathResult->addPathPoint(new PathPoint($this->targetVector3->x, $this->targetVector3->y, $this->targetVector3->z));
         while(true) {
             $node = $node->getParentNode();
             if($node instanceof Node) {
