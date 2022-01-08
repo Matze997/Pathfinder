@@ -9,20 +9,12 @@ use pocketmine\math\Vector3;
 use pocketmine\world\World;
 
 class PathResult {
-    private World $world;
-
-    private Vector3 $startVector3;
-    private Vector3 $targetVector3;
-
     /** @var PathPoint[]  */
     private array $pathPoints = [];
 
     private float $time = 0.0;
 
-    public function __construct(World $world, Vector3 $startVector3, Vector3 $targetVector3){
-        $this->world = $world;
-        $this->startVector3 = $startVector3;
-        $this->targetVector3 = $targetVector3;
+    public function __construct(private World $world, private Vector3 $startVector3, private Vector3 $targetVector3){
     }
 
     public function getWorld(): World{
