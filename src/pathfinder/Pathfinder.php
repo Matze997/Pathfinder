@@ -25,7 +25,5 @@ class Pathfinder extends PluginBase {
         EntityFactory::getInstance()->register(TestEntity::class, function(World $world, CompoundTag $nbt) : TestEntity{
             return new TestEntity(EntityDataHelper::parseLocation($nbt, $world), $nbt);
         }, ["TestEntity"], EntityLegacyIds::VILLAGER);
-
-        //DebugTool::start();
     }
 }
