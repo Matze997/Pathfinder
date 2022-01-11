@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace pathfinder\algorithm\astar;
 
 use pathfinder\algorithm\Algorithm;
-use pathfinder\cost\CostCalculator;
 use pathfinder\pathpoint\PathPoint;
 use pathfinder\pathresult\PathResult;
 use pocketmine\block\Slab;
@@ -33,29 +32,32 @@ class AStar extends Algorithm {
     /** @var Node[]  */
     private array $closedList = [];
 
-    private ?Node $startNode = null;
     private ?Node $targetNode = null;
     private ?Node $bestNode = null;
 
+    public function start(): Algorithm{
+        $world = $this->getWorld();
+        $startNode = Node::fromVector3($this->startVector3);
+        $startNode->setG(0.0);
+
+        $this->targetNode = Node::fromVector3($this->targetVector3);
+
+        $startBlock = $world->getBlock($startNode);
+        if($startBlock instanceof Slab || $startBlock instanceof Stair){
+            $startNode->y++;
+        }
+        $startNode->setH($this->calculateHCost($startNode));
+
+        $this->openList[$startNode->getHash()] = $startNode;
+        return parent::start();
+    }
+
     protected function tick(): void{
         $world = $this->getWorld();
-
-        $isInSlabOrStair = false;
-        if($this->startNode === null) {
-            $this->startNode = Node::fromVector3($this->startVector3);
-            $this->startNode->setG(0.0);
-            $this->startNode->setH($this->calculateHCost($this->startNode));
-
-            $this->targetNode = Node::fromVector3($this->targetVector3);
-
-            $this->openList[$this->startNode->getHash()] = $this->startNode;
-
-            $startBlock = $world->getBlock($this->startNode);
-            if($startBlock instanceof Slab || $startBlock instanceof Stair) {
-                $this->startNode->y++;
-                $isInSlabOrStair = true;
-            }
-        }
+        $settings = $this->getSettings();
+        $jumpHeight = $settings->getJumpHeight();
+        $fallDistance = $settings->getFallDistance();
+        $costCalculator = $settings->getCostCalculator();
 
         while($this->checkTimout()) {
             $key = $this->getLowestFCost();
@@ -79,7 +81,7 @@ class AStar extends Algorithm {
 
                     //Jump Height Check
                     $success = false;
-                    for($y = 0; $y <= ($isInSlabOrStair ?( $this->getJumpHeight() - 1) : $this->getJumpHeight()); ++$y) {
+                    for($y = 0; $y <= $jumpHeight; ++$y) {
                         if(!$this->isSafeToStandAt($side->add(0, $y, 0))) continue;
                         $side->y += $y;
                         $success = true;
@@ -88,7 +90,7 @@ class AStar extends Algorithm {
                     if(!$success) {
                         //Fall Distance Check
                         $success = false;
-                        for($y = 0; $y <= $this->getFallDistance(); ++$y) {
+                        for($y = 0; $y <= $fallDistance; ++$y) {
                             if(!$this->isSafeToStandAt($side->subtract(0, $y, 0))) continue;
                             $side->y -= $y;
                             $success = true;
@@ -103,7 +105,7 @@ class AStar extends Algorithm {
                     continue;
                 }
 
-                $cost = CostCalculator::getCost($world->getBlock($side->subtract(0, 1, 0)));
+                $cost = $costCalculator::getCost($world->getBlock($side->subtract(0, 1, 0))) * $costCalculator::getCost($world->getBlock($side));
                 if(!isset($this->openList[$sideNode->getHash()]) || $currentNode->getG() + $cost < $sideNode->getG()) {
                     $sideNode->setG($currentNode->getG() + $cost);
                     $sideNode->setH($this->calculateHCost($side));
@@ -116,7 +118,6 @@ class AStar extends Algorithm {
                     }
                 }
             }
-            $isInSlabOrStair = false;
         }
     }
 
@@ -124,12 +125,14 @@ class AStar extends Algorithm {
         $node = $this->targetNode?->getParentNode();
         if($node === null){
             $node = $this->bestNode;
-            if($node === null || $this->isOnlyAcceptFullPath()) {
+            if($node === null || $this->settings->isOnlyAcceptFullPath()) {
                 return;
             }
         }
         $pathResult = new PathResult($this->getWorld(), $this->startVector3, $this->targetVector3);
-        $pathResult->addPathPoint(new PathPoint($this->targetVector3->x, $this->targetVector3->y, $this->targetVector3->z));
+        if($this->isSafeToStandAt($this->targetVector3)) {
+            $pathResult->addPathPoint(new PathPoint($this->targetVector3->x, $this->targetVector3->y, $this->targetVector3->z));
+        }
         while(true) {
             $node = $node->getParentNode();
             if($node instanceof Node) {

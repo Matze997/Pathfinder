@@ -12,13 +12,14 @@
 
 1. Create an [AStar-Object](https://github.com/Matze997/Pathfinder/blob/master/src/pathfinder/algorithm/astar/AStar.php)
 ````php
-$aStar = new AStar(World $world, Vector3 $startVector3, Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB);
+$aStar = new AStar(World $world, Vector3 $startVector3, Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB, ?AlgorithmSettings $settings);
 ````
 
-2. Configure settings (See [Algorithm-Class](https://github.com/Matze997/Pathfinder/blob/master/src/pathfinder/algorithm/Algorithm.php) for all available methods)
+2. Configure settings (See [AlgorithmSettings-Class](https://github.com/Matze997/Pathfinder/blob/master/src/pathfinder/algorithm/AlgorithmSettings.php) for all available methods)
 ````php
-$aStar->setTimeout(float $timeout);
-$aStar->setJumpHeight(int $jumpHeight);
+$aStar->getSettings()
+    ->setTimeout(0.5)
+    ->setMaxTicks(10);
 ...
 ````
 

@@ -22,30 +22,24 @@ use function microtime;
 use function round;
 
 abstract class Algorithm {
-    protected float $startTime;
-    protected float $timeout = 0.05;
-
-    protected int $jumpHeight = 1;
-    protected int $fallDistance = 2;
-
+    protected AlgorithmSettings $settings;
     protected AxisAlignedBB $axisAlignedBB;
-
-    protected ?PathResult $pathResult = null;
 
     protected array $blockValidators = [];
 
-    private bool $onlyAcceptFullPath = false;
-
-    private ?Closure $onCompletion = null;
+    protected ?PathResult $pathResult = null;
+    protected ?Closure $onCompletion = null;
 
     protected int $tick = 0;
-    protected int $maxTicks = 0;
+
+    protected float $startTime;
     protected float $startTickTime;
 
     protected bool $running = false;
 
-    public function __construct(protected World $world, protected Vector3 $startVector3, protected Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB = null){
+    public function __construct(protected World $world, protected Vector3 $startVector3, protected Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB = null, ?AlgorithmSettings $settings = null){
         $this->axisAlignedBB = $axisAlignedBB ?? AxisAlignedBB::one();
+        $this->settings = $settings ?? new AlgorithmSettings();
     }
 
     public function getWorld(): World{
@@ -64,58 +58,8 @@ abstract class Algorithm {
         return $this->axisAlignedBB;
     }
 
-    public function getJumpHeight(): int{
-        return $this->jumpHeight;
-    }
-
-    public function setJumpHeight(int $jumpHeight): self{
-        $this->jumpHeight = $jumpHeight;
-        return $this;
-    }
-
-    public function getFallDistance(): int{
-        return $this->fallDistance;
-    }
-
-    public function setFallDistance(int $fallDistance): self{
-        $this->fallDistance = $fallDistance;
-        return $this;
-    }
-
-    public function isOnlyAcceptFullPath(): bool{
-        return $this->onlyAcceptFullPath;
-    }
-
-    /**
-     * When true, the pathfinder either returns the full path and when not found, null
-     */
-    public function setOnlyAcceptFullPath(bool $onlyAcceptFullPath): self{
-        $this->onlyAcceptFullPath = $onlyAcceptFullPath;
-        return $this;
-    }
-
-    public function getTimeout(): float{
-        return $this->timeout;
-    }
-
-    /**
-     * Set, after how many seconds the pathfinder will stop
-     */
-    public function setTimeout(float $timeout): self{
-        $this->timeout = $timeout;
-        return $this;
-    }
-
-    public function getMaxTicks(): int{
-        return $this->maxTicks;
-    }
-
-    /**
-     * Set, after how many ticks the pathfinder will stop
-     */
-    public function setMaxTicks(int $maxTicks): self{
-        $this->maxTicks = $maxTicks;
-        return $this;
+    public function getSettings(): AlgorithmSettings{
+        return $this->settings;
     }
 
     public function getPathResult(): ?PathResult{
@@ -161,19 +105,17 @@ abstract class Algorithm {
         return $this->running;
     }
 
-    public function getTick(): int{
-        return $this->tick;
-    }
-
     protected function checkTimout(): bool{
-        return $this->timeout === 0.0 || microtime(true) - $this->startTickTime < $this->timeout;
+        $timeout = $this->settings->getTimeout();
+        return $timeout === 0.0 || microtime(true) - $this->startTickTime < $timeout;
     }
 
     public function start(): self {
         if($this->running) return $this;
         $this->running = true;
         $this->startTime = microtime(true);
-        $this->tick = $this->maxTicks;
+        $this->tick = $this->settings->getMaxTicks();
+
         if($this->tick > 0) {
             Pathfinder::$instance->getScheduler()->scheduleRepeatingTask(
                 new class($this) extends Task {

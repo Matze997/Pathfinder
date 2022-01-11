@@ -6,6 +6,7 @@ namespace pathfinder\navigator;
 
 use Closure;
 use pathfinder\algorithm\Algorithm;
+use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\algorithm\astar\AStar;
 use pathfinder\cost\CostCalculator;
 use pathfinder\cost\DefaultCostCalculator;
@@ -14,22 +15,17 @@ use pathfinder\navigator\handler\MovementHandler;
 use pathfinder\pathpoint\PathPoint;
 use pathfinder\pathresult\PathResult;
 use pocketmine\block\Block;
-use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
 use function count;
-use function intval;
 
 class Navigator {
     protected float $speed = 0.3;
 
-    protected ?Vector3 $targetVector3 = null;
-    protected ?PathResult $pathResult = null;
-
     protected int $index = 0;
 
-    protected int $jumpTicks = 0;
-    protected int $stuckTicks = 0;
+    protected ?Vector3 $targetVector3 = null;
+    protected ?PathResult $pathResult = null;
 
     protected ?PathPoint $lastPathPoint = null;
     protected ?Vector3 $lastVector3 = null;
@@ -38,14 +34,17 @@ class Navigator {
 
     protected MovementHandler $movementHandler;
     protected CostCalculator $costCalculator;
-
-    protected ?Living $targetEntity = null;
+    protected AlgorithmSettings $algorithmSettings;
 
     protected ?Algorithm $algorithm = null;
 
-    public function __construct(protected Living $entity, ?MovementHandler $movementHandler = null, ?CostCalculator $costCalculator = null){
+    protected int $jumpTicks = 0;
+    protected int $stuckTicks = 0;
+
+    public function __construct(protected Living $entity, ?MovementHandler $movementHandler = null, ?CostCalculator $costCalculator = null, ?AlgorithmSettings $algorithmSettings = null){
         $this->movementHandler = $movementHandler ?? new DefaultMovementHandler();
         $this->costCalculator = $costCalculator ?? new DefaultCostCalculator();
+        $this->algorithmSettings = $algorithmSettings ?? new AlgorithmSettings();
     }
 
     public function getEntity(): Living{
@@ -60,16 +59,12 @@ class Navigator {
         $this->speed = $speed;
     }
 
-    public function getMovementHandler(): MovementHandler|DefaultMovementHandler{
-        return $this->movementHandler;
+    public function getAlgorithmSettings(): AlgorithmSettings{
+        return $this->algorithmSettings;
     }
 
     public function getPathResult(): ?PathResult{
         return $this->pathResult;
-    }
-
-    public function getLastPathPoint(): ?PathPoint{
-        return $this->lastPathPoint;
     }
 
     public function getIndex(): int{
@@ -84,24 +79,12 @@ class Navigator {
         return $this->jumpTicks;
     }
 
-    public function getAlgorithm(): ?Algorithm{
-        return $this->algorithm;
-    }
-
     public function resetJumpTicks(int $ticks = 4): void {
         $this->jumpTicks = $ticks;
     }
 
     public function registerBlockValidator(Block $block, Closure $closure): void {
         $this->blockValidators[$block->getId()] = $closure;
-    }
-
-    public function getTargetEntity(): ?Entity{
-        return $this->targetEntity;
-    }
-
-    public function setTargetEntity(?Entity $targetEntity): void{
-        $this->targetEntity = $targetEntity;
     }
 
     public function getTargetVector3(): ?Vector3{
@@ -122,30 +105,13 @@ class Navigator {
     }
 
     public function onUpdate(): void {
-        if($this->targetEntity !== null) {
-            //TODO: Move this to behaviors
-            if(
-                $this->targetEntity->isClosed() ||
-                !$this->targetEntity->isAlive()
-            ) $this->setTargetEntity(null);
-
-            if($this->targetEntity !== null) {
-                $position = $this->targetEntity->getPosition();
-                if(!$position->world->isInWorld(intval($position->x), intval($position->y), intval($position->z))) return;
-                if($this->targetVector3 === null || $this->targetVector3->distanceSquared($position) > 1) {
-                    $this->setTargetVector3($position);
-                }
-            }
-        }
         if($this->targetVector3 === null) return;
 
         $location = $this->entity->getLocation();
         if($this->pathResult === null) {
             if($this->algorithm === null || !$this->algorithm->isRunning()) {
-                $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox()))
+                $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox(), $this->getAlgorithmSettings()))
                     ->setBlockValidators($this->blockValidators)
-                    ->setTimeout(0.0005)
-                    ->setMaxTicks(0)
                     ->then(function(?PathResult $pathResult): void {
                         $this->pathResult = $pathResult;
                         if($pathResult === null) return;

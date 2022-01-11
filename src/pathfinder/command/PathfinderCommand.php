@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace pathfinder\command;
 
+use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\algorithm\astar\AStar;
 use pathfinder\entity\TestEntity;
 use pathfinder\Pathfinder;
@@ -60,9 +61,10 @@ class PathfinderCommand extends Command {
                     return;
                 }
                 $world = $location->getWorld();
-                (new AStar($world, $this->positions[1], $this->positions[2], $player->getBoundingBox()))
-                    ->setTimeout($this->timeout)
-                    ->then(function(?PathResult $pathResult) use ($sender, $world): void {
+                (new AStar($world, $this->positions[1], $this->positions[2], $player->getBoundingBox(),
+                    (new AlgorithmSettings())
+                        ->setTimeout($this->timeout))
+                )->then(function(?PathResult $pathResult) use ($sender, $world): void {
                         if(($sender instanceof Player && !$sender->isConnected()) || !$world->isLoaded()) return;
                         if($pathResult === null) {
                             $sender->sendMessage("No path found!");

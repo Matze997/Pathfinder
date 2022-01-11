@@ -7,7 +7,6 @@ namespace pathfinder\cost;
 use pocketmine\block\Block;
 
 abstract class CostCalculator {
-
     public function __construct(){
         $this->registerBlocks();
     }
