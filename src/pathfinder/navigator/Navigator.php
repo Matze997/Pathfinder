@@ -111,7 +111,6 @@ class Navigator {
         if($this->pathResult === null) {
             if($this->algorithm === null || !$this->algorithm->isRunning()) {
                 $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox(), $this->getAlgorithmSettings()))
-                    ->setBlockValidators($this->blockValidators)
                     ->then(function(?PathResult $pathResult): void {
                         $this->pathResult = $pathResult;
                         if($pathResult === null) return;

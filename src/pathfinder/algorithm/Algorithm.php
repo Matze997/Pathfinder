@@ -7,25 +7,17 @@ namespace pathfinder\algorithm;
 use Closure;
 use pathfinder\Pathfinder;
 use pathfinder\pathresult\PathResult;
-use pocketmine\block\BaseRail;
-use pocketmine\block\Block;
-use pocketmine\block\Lava;
-use pocketmine\block\Slab;
-use pocketmine\block\Stair;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\Task;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\world\World;
-use function ceil;
 use function microtime;
 use function round;
 
 abstract class Algorithm {
     protected AlgorithmSettings $settings;
     protected AxisAlignedBB $axisAlignedBB;
-
-    protected array $blockValidators = [];
 
     protected ?PathResult $pathResult = null;
     protected ?Closure $onCompletion = null;
@@ -72,32 +64,6 @@ abstract class Algorithm {
      */
     public function then(Closure $closure): self {
         $this->onCompletion = $closure;
-        return $this;
-    }
-
-    /**
-     * Register new block validator
-     * E.g. You can register a block validator for powered rails so that mobs can path find through them
-     *
-     *  $this->registerBlockValidator(VanillaBlocks::POWERED_RAIL(), function(Block $block): bool {
-     *       return true;
-     *   });
-     */
-    public function registerBlockValidator(Block $block, Closure $closure): self {
-        $this->blockValidators[$block->getId()] = $closure;
-        return $this;
-    }
-
-    /**
-     * @see registerBlockValidator()
-     *
-     * [
-     *   BLOCK_ID => Closure,
-     *   ...
-     * ]
-     */
-    public function setBlockValidators(array $blockValidators): self{
-        $this->blockValidators = $blockValidators;
         return $this;
     }
 
@@ -157,23 +123,4 @@ abstract class Algorithm {
 
     abstract protected function finish(): void;
     abstract protected function tick(): void;
-
-    protected function isBlockEmpty(Block $block): bool {
-        if(isset($this->blockValidators[$block->getId()])) {
-            return ($this->blockValidators[$block->getId()])($block);
-        }
-        return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
-    }
-
-    protected function isSafeToStandAt(Vector3 $vector3): bool {
-        $world = $this->getWorld();
-        $block = $world->getBlock($vector3->subtract(0, 1, 0));
-        if(!$block->isSolid() && !$block instanceof Slab && !$block instanceof Stair) return false;
-        $axisAlignedBB = $this->getAxisAlignedBB();
-        $height = ceil($axisAlignedBB->maxY - $axisAlignedBB->minY);
-        for($y = 0; $y <= $height; $y++) {
-            if(!$this->isBlockEmpty($world->getBlock($vector3->add(0, $y, 0)))) return false;
-        }
-        return true;
-    }
 }

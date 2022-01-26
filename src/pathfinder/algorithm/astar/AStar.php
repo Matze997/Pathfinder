@@ -73,16 +73,17 @@ class AStar extends Algorithm {
                 break;
             }
 
+            $validator = $this->settings->getValidator();
             foreach(self::SIDES as $SIDE) {
                 $side = $currentNode->add($SIDE[0], 0, $SIDE[1]);
 
-                if(!$this->isSafeToStandAt($side)){
+                if(!$validator->isSafeToStandAt($this, $side)){
                     if($SIDE[0] !== 0 && $SIDE[1] !== 0) continue;
 
                     //Jump Height Check
                     $success = false;
                     for($y = 0; $y <= $jumpHeight; ++$y) {
-                        if(!$this->isSafeToStandAt($side->add(0, $y, 0))) continue;
+                        if(!$validator->isSafeToStandAt($this, $side->add(0, $y, 0))) continue;
                         $side->y += $y;
                         $success = true;
                         break;
@@ -91,7 +92,7 @@ class AStar extends Algorithm {
                         //Fall Distance Check
                         $success = false;
                         for($y = 0; $y <= $fallDistance; ++$y) {
-                            if(!$this->isSafeToStandAt($side->subtract(0, $y, 0))) continue;
+                            if(!$validator->isSafeToStandAt($this, $side->subtract(0, $y, 0))) continue;
                             $side->y -= $y;
                             $success = true;
                             break;
@@ -130,7 +131,7 @@ class AStar extends Algorithm {
             }
         }
         $pathResult = new PathResult($this->getWorld(), $this->startVector3, $this->targetVector3);
-        if($this->isSafeToStandAt($this->targetVector3)) {
+        if($this->settings->getValidator()->isSafeToStandAt($this, $this->targetVector3)) {
             $pathResult->addPathPoint(new PathPoint($this->targetVector3->x, $this->targetVector3->y, $this->targetVector3->z));
         }
         while(true) {

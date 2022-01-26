@@ -6,9 +6,12 @@ namespace pathfinder\algorithm;
 
 use pathfinder\cost\CostCalculator;
 use pathfinder\cost\DefaultCostCalculator;
+use pathfinder\validator\DefaultValidator;
+use pathfinder\validator\Validator;
 
 class AlgorithmSettings {
     protected CostCalculator $costCalculator;
+    protected Validator $validator;
 
     public function __construct(
         protected int $jumpHeight = 1,
@@ -16,10 +19,12 @@ class AlgorithmSettings {
         protected float $timeout = 0.05,
         protected int $maxTicks = 0,
         protected bool $onlyAcceptFullPath = false,
-        ?CostCalculator $costCalculator = null
+        ?CostCalculator $costCalculator = null,
+        ?Validator $validator = null
     ) {
         //TODO: Do not load every time all blocks
         $this->costCalculator = $costCalculator ?? new DefaultCostCalculator();
+        $this->validator = $validator ?? new DefaultValidator();
     }
 
     public function getJumpHeight(): int{
@@ -82,6 +87,15 @@ class AlgorithmSettings {
 
     public function setCostCalculator(?CostCalculator $costCalculator): self{
         $this->costCalculator = $costCalculator;
+        return $this;
+    }
+
+    public function getValidator(): Validator{
+        return $this->validator;
+    }
+
+    public function setValidator(Validator $validator): self{
+        $this->validator = $validator;
         return $this;
     }
 }
