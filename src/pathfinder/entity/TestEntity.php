@@ -6,11 +6,14 @@ namespace pathfinder\entity;
 
 use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\navigator\Navigator;
+use pathfinder\Pathfinder;
 use pocketmine\entity\Location;
 use pocketmine\entity\Villager;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Server;
+use Throwable;
+
 use function array_key_first;
 use function intval;
 
@@ -40,8 +43,12 @@ class TestEntity extends Villager {
         if($this->navigator->getTargetVector3() === null || $targetVector3->distanceSquared($position) > 1) {
             $this->navigator->setTargetVector3($position);
         }
-
-        $this->navigator->onUpdate();
+		try {
+			$this->navigator->onUpdate();
+		} catch (Throwable $e) {
+			$this->flagForDespawn();
+			Pathfinder::$instance->getLogger()->logException($e);
+		}
         return parent::onUpdate($currentTick);
     }
 

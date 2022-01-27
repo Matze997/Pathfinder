@@ -74,7 +74,7 @@ class PathfinderCommand extends Command {
                         $blocks = [];
                         foreach($pathResult->getPathPoints() as $pathPoint) {
                             if(!$world->isChunkLoaded($pathPoint->getFloorX() >> 4, $pathPoint->getFloorZ() >> 4)) continue;
-                            $blocks[] = $$world->getBlock($pathPoint->subtract(0, 1, 0));
+                            $blocks[] = $world->getBlock($pathPoint->subtract(0, 1, 0));
                             $world->setBlock($pathPoint->subtract(0, 1, 0), VanillaBlocks::CONCRETE()->setColor(DyeColor::BLUE()), false);
                         }
                         $sender->sendMessage("Done! Took ".$pathResult->getTime()." seconds");
