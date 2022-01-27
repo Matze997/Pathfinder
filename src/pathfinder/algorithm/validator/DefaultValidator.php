@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace pathfinder\algorithm\validator;
+use JetBrains\PhpStorm\Pure;
 use pathfinder\algorithm\Algorithm;
 use pocketmine\block\BaseRail;
 use pocketmine\block\Block;
@@ -27,7 +28,7 @@ class DefaultValidator extends Validator{
 		return true;
 	}
 
-	protected function isBlockEmpty(Block $block): bool{
+	#[Pure] protected function isBlockEmpty(Block $block): bool{
 		return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
 	}
 }

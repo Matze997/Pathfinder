@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace pathfinder\algorithm\astar;
+use JetBrains\PhpStorm\Pure;
 use pathfinder\algorithm\Algorithm;
 use pathfinder\algorithm\path\PathPoint;
 use pathfinder\algorithm\path\PathResult;
@@ -25,11 +26,11 @@ class AStar extends Algorithm{
 		[-1, -1],
 	];
 	/** @var Node[] */
-	private array $openList = [];
+	protected array $openList = [];
 	/** @var Node[] */
-	private array $closedList = [];
-	private ?Node $targetNode = null;
-	private ?Node $bestNode = null;
+	protected array $closedList = [];
+	protected ?Node $targetNode = null;
+	protected ?Node $bestNode = null;
 
 	public function start(): Algorithm{
 		$world = $this->getWorld();
@@ -45,7 +46,7 @@ class AStar extends Algorithm{
 		return parent::start();
 	}
 
-	private function calculateHCost(Vector3 $vector3): float{
+	#[Pure] protected function calculateHCost(Vector3 $vector3): float{
 		$targetVector3 = $this->getTargetVector3();
 		return abs($vector3->x - $targetVector3->x) + abs($vector3->y - $targetVector3->y) + abs($vector3->z - $targetVector3->z);
 	}
@@ -56,6 +57,7 @@ class AStar extends Algorithm{
 		$jumpHeight = $settings->getJumpHeight();
 		$fallDistance = $settings->getFallDistance();
 		$costCalculator = $settings->getCostCalculator();
+
 		while ($this->checkTimout()) {
 			$key = $this->getLowestFCost();
 			if ($key === null)
@@ -117,7 +119,7 @@ class AStar extends Algorithm{
 		}
 	}
 
-	private function getLowestFCost(): ?int{
+	protected function getLowestFCost(): ?int{
 		$openList = [];
 		foreach ($this->openList as $hash => $node) {
 			$openList[$hash] = $node->getF();
