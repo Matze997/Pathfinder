@@ -1,0 +1,5 @@
+.idea/*
+!.idea/copyright/
+/vendor/
+build.php
+out/
