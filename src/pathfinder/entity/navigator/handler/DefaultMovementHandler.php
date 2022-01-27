@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-namespace pathfinder\algorithm\navigator\handler;
-use pathfinder\algorithm\navigator\Navigator;
+namespace pathfinder\entity\navigator\handler;
+use pathfinder\entity\navigator\Navigator;
 use pathfinder\algorithm\path\PathPoint;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace pathfinder\entity;
 use pathfinder\algorithm\AlgorithmSettings;
-use pathfinder\algorithm\navigator\Navigator;
+use pathfinder\entity\navigator\Navigator;
 use pathfinder\Pathfinder;
 use pocketmine\entity\Location;
 use pocketmine\entity\Villager;

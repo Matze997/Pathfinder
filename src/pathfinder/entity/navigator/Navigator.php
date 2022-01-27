@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
-namespace pathfinder\algorithm\navigator;
+namespace pathfinder\entity\navigator;
 use Closure;
 use pathfinder\algorithm\Algorithm;
 use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\algorithm\astar\AStar;
 use pathfinder\algorithm\cost\CostCalculator;
 use pathfinder\algorithm\cost\DefaultCostCalculator;
-use pathfinder\algorithm\navigator\handler\DefaultMovementHandler;
-use pathfinder\algorithm\navigator\handler\MovementHandler;
+use pathfinder\entity\navigator\handler\DefaultMovementHandler;
+use pathfinder\entity\navigator\handler\MovementHandler;
 use pathfinder\algorithm\path\PathPoint;
 use pathfinder\algorithm\path\PathResult;
 use pocketmine\block\Block;
