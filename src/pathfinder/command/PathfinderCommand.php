@@ -11,9 +11,9 @@ namespace pathfinder\command;
 
 use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\algorithm\astar\AStar;
+use pathfinder\algorithm\path\PathResult;
 use pathfinder\entity\TestEntity;
 use pathfinder\Pathfinder;
-use pathfinder\pathresult\PathResult;
 use pocketmine\block\Block;
 use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;

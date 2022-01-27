@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\validator;
+namespace pathfinder\algorithm\validator;
 
 use pathfinder\algorithm\Algorithm;
 use pocketmine\block\BaseRail;

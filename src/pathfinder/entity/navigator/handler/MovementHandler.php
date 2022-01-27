@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\navigator\handler;
+namespace pathfinder\entity\navigator\handler;
 
-use pathfinder\navigator\Navigator;
-use pathfinder\pathpoint\PathPoint;
+use pathfinder\algorithm\path\PathPoint;
+use pathfinder\entity\navigator\Navigator;
 
 abstract class MovementHandler {
     protected float $gravity = 0.08;

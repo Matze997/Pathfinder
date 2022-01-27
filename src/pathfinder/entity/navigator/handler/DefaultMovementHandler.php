@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\navigator\handler;
+namespace pathfinder\entity\navigator\handler;
 
-use pathfinder\navigator\Navigator;
-use pathfinder\pathpoint\PathPoint;
+use pathfinder\algorithm\path\PathPoint;
+use pathfinder\entity\navigator\Navigator;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\block\utils\SlabType;

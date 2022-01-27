@@ -7,9 +7,8 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\pathresult;
+namespace pathfinder\algorithm\path;
 
-use pathfinder\pathpoint\PathPoint;
 use pocketmine\math\Vector3;
 use pocketmine\world\World;
 

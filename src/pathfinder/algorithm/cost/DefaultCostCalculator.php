@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\cost;
+namespace pathfinder\algorithm\cost;
 
 use pocketmine\block\VanillaBlocks;
 

@@ -7,18 +7,18 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\navigator;
+namespace pathfinder\entity\navigator;
 
 use Closure;
 use pathfinder\algorithm\Algorithm;
 use pathfinder\algorithm\AlgorithmSettings;
 use pathfinder\algorithm\astar\AStar;
-use pathfinder\cost\CostCalculator;
-use pathfinder\cost\DefaultCostCalculator;
-use pathfinder\navigator\handler\DefaultMovementHandler;
-use pathfinder\navigator\handler\MovementHandler;
-use pathfinder\pathpoint\PathPoint;
-use pathfinder\pathresult\PathResult;
+use pathfinder\algorithm\cost\CostCalculator;
+use pathfinder\algorithm\cost\DefaultCostCalculator;
+use pathfinder\algorithm\path\PathPoint;
+use pathfinder\algorithm\path\PathResult;
+use pathfinder\entity\navigator\handler\DefaultMovementHandler;
+use pathfinder\entity\navigator\handler\MovementHandler;
 use pocketmine\block\Block;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;

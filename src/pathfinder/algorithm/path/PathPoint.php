@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\pathpoint;
+namespace pathfinder\algorithm\path;
 
 use pocketmine\math\Vector3;
 
