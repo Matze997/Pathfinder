@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace pathfinder\algorithm;
 
 use Closure;
+use pathfinder\algorithm\path\PathResult;
 use pathfinder\Pathfinder;
-use pathfinder\pathresult\PathResult;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\Task;

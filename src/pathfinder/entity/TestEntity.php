@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace pathfinder\entity;
 
 use pathfinder\algorithm\AlgorithmSettings;
-use pathfinder\navigator\Navigator;
+use pathfinder\entity\navigator\Navigator;
 use pathfinder\Pathfinder;
 use pocketmine\entity\Location;
 use pocketmine\entity\Villager;
@@ -18,7 +18,6 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Server;
 use Throwable;
-
 use function array_key_first;
 use function intval;
 

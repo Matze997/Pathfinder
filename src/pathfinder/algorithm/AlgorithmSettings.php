@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace pathfinder\algorithm;
 
-use pathfinder\cost\CostCalculator;
-use pathfinder\cost\DefaultCostCalculator;
-use pathfinder\validator\DefaultValidator;
-use pathfinder\validator\Validator;
+use pathfinder\algorithm\cost\CostCalculator;
+use pathfinder\algorithm\cost\DefaultCostCalculator;
+use pathfinder\algorithm\validator\DefaultValidator;
+use pathfinder\algorithm\validator\Validator;
 
 class AlgorithmSettings {
     protected CostCalculator $costCalculator;

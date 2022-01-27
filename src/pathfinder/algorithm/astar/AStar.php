@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace pathfinder\algorithm\astar;
 
 use pathfinder\algorithm\Algorithm;
-use pathfinder\pathpoint\PathPoint;
-use pathfinder\pathresult\PathResult;
+use pathfinder\algorithm\path\PathPoint;
+use pathfinder\algorithm\path\PathResult;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\math\Vector3;
@@ -136,7 +136,7 @@ class AStar extends Algorithm {
             }
         }
         $pathResult = new PathResult($this->getWorld(), $this->startVector3, $this->targetVector3);
-        if($this->settings->getValidator()->isSafeToStandAt($this, $this->targetVector3)) {
+        if($node->getHash() === $this->targetNode->getParentNode()?->getHash()) {
             $pathResult->addPathPoint(new PathPoint($this->targetVector3->x, $this->targetVector3->y, $this->targetVector3->z));
         }
         while(true) {
