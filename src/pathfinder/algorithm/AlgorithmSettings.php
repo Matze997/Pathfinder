@@ -18,6 +18,8 @@ class AlgorithmSettings {
     protected CostCalculator $costCalculator;
     protected Validator $validator;
 
+    protected float $gCostMultiplier = 1.0;
+
     public function __construct(
         protected int $jumpHeight = 1,
         protected int $fallDistance = 2,
@@ -101,6 +103,15 @@ class AlgorithmSettings {
 
     public function setValidator(Validator $validator): self{
         $this->validator = $validator;
+        return $this;
+    }
+
+    public function getGCostMultiplier(): float{
+        return $this->gCostMultiplier;
+    }
+
+    public function setGCostMultiplier(float $gCostMultiplier): self{
+        $this->gCostMultiplier = $gCostMultiplier;
         return $this;
     }
 }

@@ -113,7 +113,7 @@ class AStar extends Algorithm {
 
                 $cost = $costCalculator::getCost($world->getBlock($side->subtract(0, 1, 0))) * $costCalculator::getCost($world->getBlock($side));
                 if(!isset($this->openList[$sideNode->getHash()]) || $currentNode->getG() + $cost < $sideNode->getG()) {
-                    $sideNode->setG($currentNode->getG() + $cost);
+                    $sideNode->setG(($currentNode->getG() + $cost) * $this->settings->getGCostMultiplier());
                     $sideNode->setH($this->calculateHCost($side));
                     $sideNode->setParentNode($currentNode);
                     if(!isset($this->openList[$sideNode->getHash()])) {
