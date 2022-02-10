@@ -14,7 +14,7 @@ use pocketmine\block\VanillaBlocks;
 class DefaultCostCalculator extends CostCalculator {
     public function registerBlocks(): void{
         //Register all blocks
-        $this->register(VanillaBlocks::WATER(), 1000);
+        $this->register(VanillaBlocks::WATER(), 10000);
         $this->register(VanillaBlocks::OAK_LEAVES(), 20);
         $this->register(VanillaBlocks::ENCHANTING_TABLE(), 10, false);
         $this->register(VanillaBlocks::BARREL(), 5);
