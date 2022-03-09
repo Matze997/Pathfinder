@@ -26,19 +26,32 @@ class AStar extends Algorithm {
         [0, -1],
         [-1, 0],
 
-        [1, 1],
-        [-1, 1],
-        [1, -1],
-        [-1, -1]
+        //Diagonals
+        [1, 1, [
+            [0, 1],
+            [1, 0]
+        ]],
+        [-1, 1, [
+            [0, 1],
+            [-1, 0]
+        ]],
+        [1, -1, [
+            [1, 0],
+            [0, -1]
+        ]],
+        [-1, -1, [
+            [0, -1],
+            [-1, 0]
+        ]]
     ];
 
     /** @var Node[]  */
-    private array $openList = [];
+    protected array $openList = [];
     /** @var Node[]  */
-    private array $closedList = [];
+    protected array $closedList = [];
 
-    private ?Node $targetNode = null;
-    private ?Node $bestNode = null;
+    protected ?Node $targetNode = null;
+    protected ?Node $bestNode = null;
 
     public function start(): Algorithm{
         $world = $this->getWorld();
@@ -78,13 +91,22 @@ class AStar extends Algorithm {
                 break;
             }
 
+            $checkedSides = [];
             $validator = $this->settings->getValidator();
             foreach(self::SIDES as $SIDE) {
                 $side = $currentNode->add($SIDE[0], 0, $SIDE[1]);
 
-                if(!$validator->isSafeToStandAt($this, $side)){
-                    if($SIDE[0] !== 0 && $SIDE[1] !== 0) continue;
+                $valid = $SIDE[0] === 0 || $SIDE[1] === 0;
+                if(!$valid) {
+                    foreach($SIDE[2] as $__SIDE) {
+                        $valid = $checkedSides[$__SIDE[0].$__SIDE[1]] ?? false;
+                        if(!$valid) {
+                            continue 2;
+                        }
+                    }
+                }
 
+                if($valid && !($checkedSides[$SIDE[0].$SIDE[1]] = $validator->isSafeToStandAt($this, $side))){
                     //Jump Height Check
                     $success = false;
                     for($y = 0; $y <= $jumpHeight; ++$y) {
@@ -150,7 +172,7 @@ class AStar extends Algorithm {
         $this->pathResult = $pathResult;
     }
 
-    private function getLowestFCost(): ?int {
+    protected function getLowestFCost(): ?int {
         $openList = [];
         foreach($this->openList as $hash => $node) {
             $openList[$hash] = $node->getF();
@@ -159,7 +181,7 @@ class AStar extends Algorithm {
         return array_key_first($openList);
     }
 
-    private function calculateHCost(Vector3 $vector3): float{
+    protected function calculateHCost(Vector3 $vector3): float{
         $targetVector3 = $this->getTargetVector3();
         return abs($vector3->x - $targetVector3->x) + abs($vector3->y - $targetVector3->y) + abs($vector3->z - $targetVector3->z);
     }
