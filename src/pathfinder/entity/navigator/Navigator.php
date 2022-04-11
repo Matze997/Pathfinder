@@ -115,16 +115,7 @@ class Navigator {
         $location = $this->entity->getLocation();
         if($this->pathResult === null) {
             if($this->algorithm === null || !$this->algorithm->isRunning()) {
-                $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox(), $this->getAlgorithmSettings()))
-                    ->then(function(?PathResult $pathResult): void {
-                        $this->pathResult = $pathResult;
-                        if($pathResult === null) return;
-                        $count = count($this->pathResult->getPathPoints());
-                        $this->index = match (true) {
-                            ($count > 1) => ($count - 2),
-                            default => ($count - 1)
-                        };
-                    })->start();
+                $this->findPath();
             }
             return;
         }
@@ -154,5 +145,22 @@ class Navigator {
         }
         $this->lastVector3 = $location->asVector3();
         $this->lastPathPoint = $pathPoint;
+    }
+
+    public function findPath(?Closure $closure = null): void {
+        $location = $this->entity->getLocation();
+        $this->algorithm = (new AStar($this->entity->getWorld(), $location->floor(), $this->targetVector3, $this->entity->getBoundingBox(), $this->getAlgorithmSettings()))
+            ->then(function(?PathResult $pathResult) use ($closure): void {
+                $this->pathResult = $pathResult;
+                if($closure !== null) {
+                    ($closure)($pathResult);
+                }
+                if($pathResult === null) return;
+                $count = count($this->pathResult->getPathPoints());
+                $this->index = match (true) {
+                    ($count > 1) => ($count - 2),
+                    default => ($count - 1)
+                };
+            })->start();
     }
 }
