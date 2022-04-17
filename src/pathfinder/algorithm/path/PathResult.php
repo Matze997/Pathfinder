@@ -1,9 +1,4 @@
 <?php
-/*
- * Copyright (c) Matze997
- * All rights reserved.
- * Under GPL license
- */
 
 declare(strict_types=1);
 
@@ -18,8 +13,11 @@ class PathResult {
 
     private float $time = 0.0;
 
-    public function __construct(private World $world, private Vector3 $startVector3, private Vector3 $targetVector3){
-    }
+    public function __construct(
+        private World $world,
+        private Vector3 $startVector3,
+        private Vector3 $targetVector3
+    ){}
 
     public function getWorld(): World{
         return $this->world;
