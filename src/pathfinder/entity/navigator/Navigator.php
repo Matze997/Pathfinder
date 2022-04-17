@@ -14,7 +14,6 @@ use pathfinder\algorithm\path\PathPoint;
 use pathfinder\algorithm\path\PathResult;
 use pathfinder\entity\navigator\handler\DefaultMovementHandler;
 use pathfinder\entity\navigator\handler\MovementHandler;
-use pocketmine\block\Block;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
 use function count;
