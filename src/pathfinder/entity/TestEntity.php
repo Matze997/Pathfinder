@@ -32,11 +32,15 @@ class TestEntity extends Villager {
 
     public function onUpdate(int $currentTick): bool{
         $target = Server::getInstance()->getOnlinePlayers()[array_key_first(Server::getInstance()->getOnlinePlayers())] ?? null;
-        if($target === null) return parent::onUpdate($currentTick);
+        if($target === null) {
+            parent::onUpdate($currentTick);
+            return true;
+        }
         $position = $target->getPosition();
         $targetVector3 = $this->navigator->getTargetVector3();
         if(!$position->world->isInWorld(intval($position->x), intval($position->y), intval($position->z))){
-            return parent::onUpdate($currentTick);
+            parent::onUpdate($currentTick);
+            return true;
         }
 
         if($this->navigator->getTargetVector3() === null || $targetVector3->distanceSquared($position) > 1) {
@@ -48,7 +52,8 @@ class TestEntity extends Villager {
 			$this->flagForDespawn();
 			Pathfinder::$instance->getLogger()->logException($e);
 		}
-        return parent::onUpdate($currentTick);
+        parent::onUpdate($currentTick);
+        return true;
     }
 
     public function attack(EntityDamageEvent $source): void{
