@@ -7,7 +7,7 @@ namespace pathfinder\algorithm\validator;
 use pathfinder\algorithm\Algorithm;
 use pocketmine\block\BaseRail;
 use pocketmine\block\Block;
-use pocketmine\block\Lava;
+use pocketmine\block\Liquid;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\math\Vector3;
@@ -27,6 +27,6 @@ class DefaultValidator extends Validator {
     }
 
     protected function isBlockEmpty(Block $block): bool {
-        return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Lava;
+        return !$block->isSolid() && !$block instanceof BaseRail && !$block instanceof Liquid;
     }
 }
