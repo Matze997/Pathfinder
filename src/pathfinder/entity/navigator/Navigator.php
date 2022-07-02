@@ -99,6 +99,7 @@ class Navigator {
     }
 
     public function recalculatePath(): void {
+        if($this->jumpTicks > 0) return;
         $this->algorithm?->stop();
         $this->algorithm = null;
         $this->pathResult = null;
@@ -108,6 +109,7 @@ class Navigator {
     }
 
     public function onUpdate(): void {
+        if($this->jumpTicks > 0) $this->jumpTicks--;
         if($this->targetVector3 === null) return;
 
         $location = $this->entity->getLocation();
@@ -130,7 +132,6 @@ class Navigator {
                 return;
             }
         }
-        if($this->jumpTicks > 0) $this->jumpTicks--;
         $this->movementHandler->handle($this, $pathPoint);
         if($this->lastVector3 !== null && $this->lastVector3->x === $location->x && $this->lastVector3->z === $location->z) {
             if(++$this->stuckTicks >= 20){
