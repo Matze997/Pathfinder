@@ -5,4 +5,8 @@ branches:
 projects:
   Pathfinder:
     path: ""
+  libPathfinder:
+    path: ""
+    type: library
+    model: virion
 ...
