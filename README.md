@@ -1,45 +1,72 @@
 # A WIP [PocketMine](https://github.com/pmmp/PocketMine-MP) Pathfinder
 
+# VIRION IS CURRENTLY IN ALPHA PHASE!
+
 ## Features:
-- AStar pathfinding
-- Pathfinding can be divided into several ticks
-- Set costs for various blocks
-- Navigator for entities
+- Async Pathfinding
+- Sync Pathfinding
+- Path smoothing
+- Easy to use API
 
-## API:
+### About asynchronus pathfinding:
+Async pathfinding is always the method I recommend due to it´s huge performance benefit. But you have to consider that pathfinding on another thread can lead to wrong paths due to block updates during pathfinding.
+Additionally, async pathfinding takes a bit longer then running the pathfinder on the main thread (Depends on the distance and chunks required to compute the path). But on the other hand the main thread doesn´t even recognize any path computation.
+You also consider adding a queue if many paths have to be calculated, otherwise stuff like chunk loading & packet compression will take longer.
 
-#### Finding a path between two points:
+## Code examples:
 
-1. Create an [AStar-Object](https://github.com/Matze997/Pathfinder/blob/master/src/pathfinder/algorithm/astar/AStar.php)
-````php
-$aStar = new AStar(World $world, Vector3 $startVector3, Vector3 $targetVector3, ?AxisAlignedBB $axisAlignedBB, ?AlgorithmSettings $settings);
-````
+#### Finding a path between two points (Sync):
+```php
+//Initialize settings
+$settings = \matze\pathfinder\setting\Settings::get()
+    ->setJumpHeight(1)
+    ->setFallDistance(2)
+    ->setTimeout(0.05);
+    
+$start = new \pocketmine\math\Vector3(0, 100, 0);
+$target = new \pocketmine\math\Vector3(10, 100, 0);
 
-2. Configure settings (See [AlgorithmSettings-Class](https://github.com/Matze997/Pathfinder/blob/master/src/pathfinder/algorithm/AlgorithmSettings.php) for all available methods)
-````php
-$aStar->getSettings()
-    ->setTimeout(0.5)
-    ->setMaxTicks(10);
-...
-````
+//Create object
+$pathfinder = new \matze\pathfinder\type\SyncPathfinder($settings, $player->getWorld());
 
-3. Start and get pathfinding result
-````php
-$aStar->then(function(?PathResult $pathResult): void {
-    if($pathResult === null) {
-        echo "No path found!";
-        return;
+//Run findPath method and set closure for handling the path result
+$result = $pathfinder->findPath($start, $target);
+if($result === null) {
+    //Path not found
+} else {
+    //Path found
+}
+```
+
+#### Finding a path between two points (Async):
+
+```php
+//Initialize settings
+$settings = \matze\pathfinder\setting\Settings::get()
+    ->setJumpHeight(1)
+    ->setFallDistance(2)
+    ->setTimeout(1.0);
+    
+$start = new \pocketmine\math\Vector3(0, 100, 0);
+$target = new \pocketmine\math\Vector3(10, 100, 0);
+
+//Create object
+$pathfinder = new \matze\pathfinder\type\AsyncPathfinder($settings, $player->getWorld());
+
+//Run findPath method and set closure for handling the path result
+$pathfinder->findPath($start, $target, function (?\matze\pathfinder\result\PathResult $result): void {
+    if($result === null) {
+        //Path not found
+    } else {
+        //Path found
     }
-    echo "Path found!";
-})->start();
-````
+});
+```
 
+## TODO:
+- Restructure everything (It´s a bit messy atm)
 
-## Important:
-This pathfinder is not the best, but you can help to improve it. If you see code places that can be improved or any method/variable names that don't fit, please create a pull request with the respective changes.
-### Thanks!
+#### You´re always welcome to contribute!
 
 ## Contact me:
-
-[Twitter](https://twitter.com/Matze998/with_replies)  
 Discord: Matze#1754

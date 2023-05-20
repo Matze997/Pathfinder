@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace pathfinder\algorithm\astar;
+namespace matze\pathfinder\node;
 
 use pocketmine\math\Vector3;
 use pocketmine\world\World;
-use function floor;
-use function intval;
 
 class Node extends Vector3 {
     private float $g = PHP_INT_MAX;
@@ -18,7 +16,7 @@ class Node extends Vector3 {
     private int $hash;
 
     public function __construct(float|int $x, float|int $y, float|int $z){
-        $this->hash = World::blockHash(intval(floor($x)), intval(floor($y)), intval(floor($z)));
+        $this->hash = World::blockHash((int)floor($x), (int)floor($y), (int)floor($z));
         parent::__construct($x, $y, $z);
     }
 
