@@ -172,34 +172,20 @@ abstract class BasePathfinder{
         return true;
     }
 
-    /**
-     * Returns if the block is safe to stand on
-     */
     protected function isBlockSolid(Block $block): bool {
-        return $block->isSolid();
+        return $this->settings->getPathRules()->isBlockSolid($block);
     }
 
-    /**
-     * Returns if entities can walk through this block
-     */
     protected function isBlockPassable(Block $block): bool {
-        return count($block->getCollisionBoxes()) <= 0;
+        return $this->settings->getPathRules()->isBlockPassable($block);
     }
 
-    /**
-     * Returns the cost of the block the entity will stand inside
-     * The higher the value, the pathfinder will more likely avoid this block
-     */
     protected function getCostInside(Block $block): int {
-        return 0;
+        return $this->settings->getPathRules()->getCostInside($block);
     }
 
-    /**
-     * Returns the cost of the block the entity will stand on top
-     * The higher the value, the pathfinder will more likely avoid this block
-     */
     protected function getCostStanding(Block $block): int {
-        return 0;
+        return $this->settings->getPathRules()->getCostStanding($block);
     }
 
     protected function isClearShaft(Vector3 $from, int $targetY): bool {

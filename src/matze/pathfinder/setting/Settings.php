@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace matze\pathfinder\setting;
 
+use matze\pathfinder\setting\rule\DefaultPathRules;
+use matze\pathfinder\setting\rule\PathRules;
 use pocketmine\entity\EntitySizeInfo;
 
 class Settings{
@@ -13,6 +15,8 @@ class Settings{
     private float $timeout = 0.05;
 
     private ?EntitySizeInfo $size = null;
+
+    private ?PathRules $pathRules = null;
 
     public static function get(): self {
         return new self();
@@ -51,5 +55,13 @@ class Settings{
 
     public function setSize(?EntitySizeInfo $size): void{
         $this->size = $size;
+    }
+
+    public function getPathRules(): PathRules{
+        return $this->pathRules ??= new DefaultPathRules();
+    }
+
+    public function setPathRules(PathRules $pathRules): void{
+        $this->pathRules = $pathRules;
     }
 }
