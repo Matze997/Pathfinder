@@ -61,7 +61,8 @@ class Settings{
         return $this->pathRules ??= new DefaultPathRules();
     }
 
-    public function setPathRules(PathRules $pathRules): void{
+    public function setPathRules(PathRules $pathRules): self{
         $this->pathRules = $pathRules;
+        return $this;
     }
 }
