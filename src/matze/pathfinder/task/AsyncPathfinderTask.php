@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace matze\pathfinder\task;
 
-use Closure;
 use matze\pathfinder\AsyncChunkPathfinder;
 use matze\pathfinder\setting\Settings;
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\math\Vector3;
 use pocketmine\math\VoxelRayTrace;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\world\format\io\FastChunkSerializer;
 use pocketmine\world\World;
-use ThreadedArray;
 
 class AsyncPathfinderTask extends AsyncTask {
     public string $world;
@@ -25,22 +24,23 @@ class AsyncPathfinderTask extends AsyncTask {
 
     public ?string $chunk;
 
-    private ThreadedArray $chunks;
+    private ThreadSafeArray $chunks;
 
     public function __construct(
         Vector3 $startVector,
         Vector3 $targetVector,
         Settings $settings,
         World $world,
-        private Closure $onCompletion,
+        $onCompletion,
         protected int $chunkCacheLimit
     ){
         $this->world = $world->getFolderName();
         $this->settings = igbinary_serialize($settings);
         $this->start = World::blockHash($startVector->getFloorX(), $startVector->getFloorY(), $startVector->getFloorZ());
         $this->target = World::blockHash($targetVector->getFloorX(), $targetVector->getFloorY(), $targetVector->getFloorZ());
+        $this->storeLocal("onCompletion", $onCompletion);
 
-        $this->chunks = new ThreadedArray();
+        $this->chunks = new ThreadSafeArray();
         foreach (VoxelRayTrace::betweenPoints($startVector, $targetVector) as $point) {
             $chunkX = $point->getFloorX() >> 4;
             $chunkZ = $point->getFloorZ() >> 4;
@@ -74,7 +74,8 @@ class AsyncPathfinderTask extends AsyncTask {
     }
 
     public function onCompletion() : void{
-        ($this->onCompletion)($this->getResult());
+        $onCompletion = $this->fetchLocal("onCompletion");
+        ($onCompletion)($this->getResult());
     }
 
     public function onProgressUpdate($progress): void{
