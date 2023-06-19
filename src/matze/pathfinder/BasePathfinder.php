@@ -28,6 +28,9 @@ abstract class BasePathfinder{
     abstract protected function getBlockAt(int $x, int $y, int $z): Block;
 
     public function findPath(Vector3 $startVector, Vector3 $targetVector): ?PathResult {
+        if($startVector->floor()->equals($targetVector->floor())) {
+            return null;
+        }
         $this->openList = [];
         $closedList = [];
 
@@ -72,7 +75,7 @@ abstract class BasePathfinder{
                 if(isset($closedList[$node->getHash()])) {
                     continue;
                 }
-                $cost = $this->getCostInside($this->getBlockAt($x, (int)$y, $z)) + $this->getCostStanding($this->getBlockAt($x, (int)($y - 1), $z));
+                $cost = $this->getCostInside($this->getBlockAt($x, (int)$y, $z)) + $this->getCostStanding($this->getBlockAt($x, (int)($y - 1), $z)) + abs($currentNode->getY() - $node->getY());
                 if(!isset($this->openList[$node->getHash()]) || ($currentNode->getG() + $cost) < $node->getG()) {
                     $node->setG(($currentNode->getG() + $cost));
                     $node->setH($node->distance($targetVector));
