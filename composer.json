@@ -1,0 +1,20 @@
+{
+  "name": "matze/pathfinder",
+  "description": "PocketMine-MP Pathfinder",
+  "minimum-stability": "stable",
+  "license": "gpl-3.0-or-later",
+  "require": {
+    "pocketmine/pocketmine-mp": "^5.0.0"
+  },
+  "autoload": {
+    "psr-0": {
+      "matze\\pathfinder\\": "src/"
+    }
+  },
+  "extra": {
+    "virion":{
+      "spec": "3.0",
+      "namespace-root": "matze\\pathfinder"
+    }
+  }
+}
