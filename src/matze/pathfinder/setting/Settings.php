@@ -4,65 +4,48 @@ declare(strict_types=1);
 
 namespace matze\pathfinder\setting;
 
-use matze\pathfinder\setting\rule\DefaultPathRules;
-use matze\pathfinder\setting\rule\PathRules;
-use pocketmine\entity\EntitySizeInfo;
-
-class Settings{
-    private int $jumpHeight = 1;
-    private int $fallDistance = 2;
-
-    private float $timeout = 0.05;
-
-    private ?EntitySizeInfo $size = null;
-
-    private ?PathRules $pathRules = null;
+class Settings {
+    private int $maxTravelDistanceUp = 1;
+    private int $maxTravelDistanceDown = 1;
+    private bool $pathSmoothing = true;
 
     public static function get(): self {
         return new self();
     }
 
-    public function getTimeout(): float{
-        return $this->timeout;
-    }
-
-    public function setTimeout(float $timeout): self {
-        $this->timeout = $timeout;
+    /**
+     * Set how many blocks the pathfinder should travel down until a position is declared invalid
+     */
+    public function setMaxTravelDistanceDown(int $maxTravelDistanceDown): self{
+        $this->maxTravelDistanceDown = $maxTravelDistanceDown;
         return $this;
     }
 
-    public function getFallDistance(): int{
-        return $this->fallDistance;
+    public function getMaxTravelDistanceDown(): int{
+        return $this->maxTravelDistanceDown;
     }
 
-    public function setFallDistance(int $fallDistance): self {
-        $this->fallDistance = $fallDistance;
+    /**
+     * Set how many blocks the pathfinder should travel up until a position is declared invalid
+     */
+    public function setMaxTravelDistanceUp(int $maxTravelDistanceUp): self{
+        $this->maxTravelDistanceUp = $maxTravelDistanceUp;
         return $this;
     }
 
-    public function getJumpHeight(): int{
-        return $this->jumpHeight;
+    public function getMaxTravelDistanceUp(): int{
+        return $this->maxTravelDistanceUp;
     }
 
-    public function setJumpHeight(int $jumpHeight): self {
-        $this->jumpHeight = $jumpHeight;
+    /**
+     * Set if the path should be smoothed before it gets returned
+     */
+    public function setPathSmoothing(bool $pathSmoothing): self{
+        $this->pathSmoothing = $pathSmoothing;
         return $this;
     }
 
-    public function getSize(): EntitySizeInfo{
-        return $this->size ?? new EntitySizeInfo(1.8, 1);
-    }
-
-    public function setSize(?EntitySizeInfo $size): void{
-        $this->size = $size;
-    }
-
-    public function getPathRules(): PathRules{
-        return $this->pathRules ??= new DefaultPathRules();
-    }
-
-    public function setPathRules(PathRules $pathRules): self{
-        $this->pathRules = $pathRules;
-        return $this;
+    public function isPathSmoothing(): bool{
+        return $this->pathSmoothing;
     }
 }
