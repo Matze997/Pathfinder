@@ -8,21 +8,15 @@ use matze\pathfinder\Pathfinder;
 use matze\pathfinder\result\PathResult;
 use matze\pathfinder\rule\default\ChickenRule;
 use matze\pathfinder\setting\Settings;
-use pocketmine\block\Block;
-use pocketmine\block\utils\DyeColor;
-use pocketmine\block\VanillaBlocks;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntitySizeInfo;
-use pocketmine\entity\Living;
 use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
-use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\World;
 
 class PathfinderCommand extends Command {
