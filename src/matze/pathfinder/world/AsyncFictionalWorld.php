@@ -25,8 +25,7 @@ class AsyncFictionalWorld extends FictionalWorld {
     }
 
     public function getBlockAt(int $x, int $y, int $z): Block{
-        $chunk = $this->getChunkAt($x, $z);
-        if($chunk === null) {
+        if($y > World::Y_MAX || $y < World::Y_MIN || ($chunk = $this->getChunkAt($x, $z)) === null) {
             return VanillaBlocks::AIR();
         }
         return RuntimeBlockStateRegistry::getInstance()->fromStateId($chunk->getBlockStateId($x % 16, $y, $z % 16));
