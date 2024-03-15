@@ -99,15 +99,15 @@ class BasePathfinder {
                 $y = $currentNode->y;
                 $z = (int)floor($currentNode->z + $SIDE[1]);
                 $node = new Node($x + 0.5, $y, $z + 0.5);
-                if(isset($closedList[$node->getHash()])) {
-                    continue;
-                }
                 $cost = 1;
                 if(!$this->isNicePositionToWalk($currentNode, $node, $cost)) {
                     continue;
                 }
-                if(!isset($this->openList[$node->getHash()]) || ($currentNode->getG() * $cost) < $node->getG()) {
-                    $node->setG(($currentNode->getG() * $cost));
+                if(isset($closedList[$node->getHash()])) {
+                    continue;
+                }
+                if(!isset($this->openList[$node->getHash()]) || ($currentNode->getG() + $cost) < $node->getG()) {
+                    $node->setG(($currentNode->getG() + $cost));
                     $node->setH($node->distance($targetVector));
                     $node->setParentNode($currentNode);
                     $this->openList[$node->getHash()] = $node;

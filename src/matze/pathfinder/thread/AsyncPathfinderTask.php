@@ -15,7 +15,7 @@ use pocketmine\world\format\io\FastChunkSerializer;
 use pocketmine\world\World;
 
 class AsyncPathfinderTask extends AsyncTask {
-    public ?string $missingChunkResult = null;
+    public ?string $missingChunkResult;
 
     public function __construct(
         private int $start,
@@ -25,6 +25,7 @@ class AsyncPathfinderTask extends AsyncTask {
         private string $settings,
         private ThreadSafeArray $rules,
         private int $chunkCacheLimit,
+        private ThreadSafeArray $defaultChunks,
         Closure $onCompletion,
     ){
         $this->storeLocal("onCompletion", $onCompletion);
@@ -35,7 +36,13 @@ class AsyncPathfinderTask extends AsyncTask {
         foreach($this->rules as $value) {
             $rules[] = igbinary_unserialize($value);
         }
-        $pathfinder = new BasePathfinder(new AsyncFictionalWorld($this->world, $this, $this->chunkCacheLimit), igbinary_unserialize($this->settings), $this->timeout, $rules);
+        $world = new AsyncFictionalWorld($this->world, $this, $this->chunkCacheLimit);
+        foreach($this->defaultChunks as $hash => $chunk) {
+            World::getXZ($hash, $chunkX, $chunkZ);
+            $world->setChunk($chunkX, $chunkZ, FastChunkSerializer::deserializeTerrain($chunk));
+        }
+
+        $pathfinder = new BasePathfinder($world, igbinary_unserialize($this->settings), $this->timeout, $rules);
         World::getBlockXYZ($this->start, $startX, $startY, $startZ);
         World::getBlockXYZ($this->target, $targetX, $targetY, $targetZ);
         $this->setResult($pathfinder->findPath(new Vector3($startX, $startY, $startZ), new Vector3($targetX, $targetY, $targetZ)));

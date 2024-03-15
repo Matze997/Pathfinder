@@ -10,6 +10,7 @@ use matze\pathfinder\result\PathResult;
 use matze\pathfinder\rule\Rule;
 use matze\pathfinder\setting\Settings;
 use matze\pathfinder\thread\AsyncPathfinderTask;
+use matze\pathfinder\util\Utils;
 use matze\pathfinder\world\SyncFictionalWorld;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\math\Vector3;
@@ -18,6 +19,7 @@ use pocketmine\permission\Permission;
 use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
+use pocketmine\world\format\io\FastChunkSerializer;
 use pocketmine\world\World;
 
 class Pathfinder {
@@ -87,10 +89,19 @@ class Pathfinder {
         return $pathfinder->findPath($from, $to);
     }
 
-    public function findPathAsync(Vector3 $from, Vector3 $to, World $world, Closure $closure, float $timeout = 0.2, int $chunkCacheLimit = 32): void {
+    public function findPathAsync(Vector3 $from, Vector3 $to, World $world, Closure $closure, float $timeout = 0.2, int $chunkCacheLimit = 64): void {
+        $chunks = [];
+        foreach(Utils::getChunksBetween($from, $to) as $vector2) {
+            $x = $vector2->getFloorX();
+            $y = $vector2->getFloorY();
+            $chunk = $world->getChunk($x, $y);
+            if($chunk !== null) {
+                $chunks[World::chunkHash($x, $y)] = FastChunkSerializer::serializeTerrain($chunk);
+            }
+        }
         Server::getInstance()->getAsyncPool()->submitTask(new AsyncPathfinderTask(World::blockHash($from->getFloorX(), $from->getFloorY(), $from->getFloorZ()), World::blockHash($to->getFloorX(), $to->getFloorY(), $to->getFloorZ()), $world->getFolderName(), $timeout, igbinary_serialize($this->settings), ThreadSafeArray::fromArray(array_map(function(Rule $rule): string {
             return igbinary_serialize($rule);
-        }, $this->rules)), $chunkCacheLimit, $closure));
+        }, $this->rules)), $chunkCacheLimit, ThreadSafeArray::fromArray($chunks), $closure));
     }
 
     public function isRunning(): bool{

@@ -32,18 +32,22 @@ class AsyncFictionalWorld extends FictionalWorld {
         return RuntimeBlockStateRegistry::getInstance()->fromStateId($chunk->getBlockStateId($x % 16, $y, $z % 16));
     }
 
+    public function setChunk(int $chunkX, int $chunkZ, Chunk $chunk): void {
+        $this->chunks[World::chunkHash($chunkX, $chunkZ)] = $chunk;
+    }
+
     protected function getChunkAt(int $x, int $z): ?Chunk {
         $chunkX = $x >> 4;
         $chunkZ = $z >> 4;
         $hash = World::chunkHash($chunkX, $chunkZ);
         if(!array_key_exists($hash, $this->chunks)) {
             $this->task->publishProgress($hash);
-            while($this->task->missingChunkResult === null) {
+            while(!isset($this->task->missingChunkResult)) {
                 if($this->task->isTerminated()) {
                     return null;
                 }
             }
-            $chunk = $this->task->missingChunkResult ?? "";
+            $chunk = $this->task->missingChunkResult;
             if($chunk === null) {
                 $this->chunks[$hash] = null;
             } else {
@@ -52,7 +56,7 @@ class AsyncFictionalWorld extends FictionalWorld {
             if(count($this->chunks) > $this->chunkCacheLimit) {
                 array_shift($this->chunks);
             }
-            $this->task->missingChunkResult = null;
+            unset($this->task->missingChunkResult);
         }
         return $this->chunks[$hash] ?? null;
     }
