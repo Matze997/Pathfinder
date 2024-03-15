@@ -12,10 +12,10 @@ class Utils {
      * @return Vector2[]
      */
     public static function getChunksBetween(Vector3 $v1, Vector3 $v2): array {
-        $minX = min($v1->getFloorX() >> 4, $v2->getFloorX() >> 4) - 1;
-        $maxX = max($v1->getFloorX() >> 4, $v2->getFloorX() >> 4) + 1;
-        $minZ = min($v1->getFloorZ() >> 4, $v2->getFloorZ() >> 4) - 1;
-        $maxZ = max($v1->getFloorZ() >> 4, $v2->getFloorZ() >> 4) + 1;
+        $minX = min($v1->getFloorX() >> 4, $v2->getFloorX() >> 4);
+        $maxX = max($v1->getFloorX() >> 4, $v2->getFloorX() >> 4);
+        $minZ = min($v1->getFloorZ() >> 4, $v2->getFloorZ() >> 4);
+        $maxZ = max($v1->getFloorZ() >> 4, $v2->getFloorZ() >> 4);
 
         $positions = [];
         for($xx = $minX; $xx <= $maxX; $xx++) {
