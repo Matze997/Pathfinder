@@ -24,7 +24,7 @@ class EntitySizeRule extends Rule {
     ){
         parent::__construct($priority);
         $this->halfWidth = (int)round($size->getWidth() / 2, PHP_ROUND_HALF_DOWN);
-        $this->height = (int)ceil($size->getHeight());
+        $this->height = (int)ceil(max($size->getHeight() - 1, 1));
     }
 
     public function couldWalkTo(Vector3 $currentNode, Vector3 $targetNode, FictionalWorld $world, Settings $settings, int &$cost): bool{
