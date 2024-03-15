@@ -11,6 +11,9 @@ use pocketmine\block\Block;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\math\Vector3;
 
+/**
+ * Useful for every normal walking entity
+ */
 class EntitySizeRule extends Rule {
     protected int $halfWidth;
     protected int $height;
