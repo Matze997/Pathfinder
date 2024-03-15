@@ -13,7 +13,13 @@ use pocketmine\block\utils\DyeColor;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\entity\Entity;
+use pocketmine\entity\EntitySizeInfo;
+use pocketmine\entity\Living;
+use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\scheduler\ClosureTask;
@@ -95,18 +101,40 @@ class PathfinderCommand extends Command {
     }
 
     private function visualizePath(World $world, PathResult $result): void {
-        $block = VanillaBlocks::CONCRETE()->setColor(DyeColor::RED);
-
-        /** @var Block[] $replaced */
-        $replaced = [];
+        $id = 0;
         foreach($result->getNodes() as $node) {
-            $replaced[$node->getHash()] = clone $world->getBlock($node);
-            $world->setBlock($node, $block);
+            $entity = (new class(Location::fromObject($node, $world, 0, 0)) extends Entity {
+                protected function getInitialSizeInfo(): EntitySizeInfo{
+                    return new EntitySizeInfo(0.1, 0.1);
+                }
+
+                protected function getInitialDragMultiplier(): float{
+                    return 0.0;
+                }
+
+                protected function getInitialGravity(): float{
+                    return 0.0;
+                }
+
+                public static function getNetworkTypeId(): string{
+                    return EntityIds::PIG;
+                }
+
+                public function onUpdate(int $currentTick): bool{
+                    if($this->ticksLived > 400) {
+                        $this->flagForDespawn();
+                        return true;
+                    }
+                    parent::onUpdate($currentTick);
+                    return true;
+                }
+            });
+            $entity->setNameTagVisible();
+            $entity->setNameTagAlwaysVisible();
+            $entity->setNameTag("§r§6§l".$id++);
+            $entity->setCanSaveWithChunk(false);
+            $entity->setScale(0.0000000001);
+            $entity->spawnToAll();
         }
-        $this->plugin->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($replaced, $world): void {
-            foreach($replaced as $block) {
-                $world->setBlock($block->getPosition(), $block);
-            }
-        }), 30 * 20);
     }
 }
