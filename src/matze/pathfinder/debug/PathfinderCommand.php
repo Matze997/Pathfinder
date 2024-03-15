@@ -6,7 +6,7 @@ namespace matze\pathfinder\debug;
 
 use matze\pathfinder\Pathfinder;
 use matze\pathfinder\result\PathResult;
-use matze\pathfinder\rule\default\ChickenRule;
+use matze\pathfinder\rule\default\EntitySizeRule;
 use matze\pathfinder\setting\Settings;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -31,7 +31,7 @@ class PathfinderCommand extends Command {
         parent::__construct("pathfinder", "Pathfinder Command");
         $this->setPermission("command.pathfinder.use");
         $this->pathfinder = new Pathfinder([
-            new ChickenRule(),
+            new EntitySizeRule(new EntitySizeInfo(2, 1)),
         ], Settings::get()->setPathSmoothing(false));
     }
 
