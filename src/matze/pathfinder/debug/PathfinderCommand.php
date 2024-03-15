@@ -50,6 +50,13 @@ class PathfinderCommand extends Command {
                 $sender->sendMessage("Set second position.");
                 break;
             }
+            case "swap": {
+                $first = clone $this->first;
+                $this->first = clone $this->second;
+                $this->second = $first;
+                $sender->sendMessage("Swapped two positions.");
+                break;
+            }
             case "runsync": {
                 if(!isset($this->first, $this->second)) {
                     $sender->sendMessage("You first have to set two positions!");
@@ -88,6 +95,7 @@ class PathfinderCommand extends Command {
                 $sender->sendMessage("Pathfinder Command Help:");
                 $sender->sendMessage("/pathfinder 1");
                 $sender->sendMessage("/pathfinder 2");
+                $sender->sendMessage("/pathfinder swap");
                 $sender->sendMessage("/pathfinder runsync [timeout=0.2]");
                 $sender->sendMessage("/pathfinder runasync [timeout=0.2]");
             }
