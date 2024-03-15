@@ -90,6 +90,7 @@ class Pathfinder {
     }
 
     public function findPathAsync(Vector3 $from, Vector3 $to, World $world, Closure $closure, float $timeout = 0.2, int $chunkCacheLimit = 64): void {
+        $this->running = true;
         $chunks = [];
         foreach(Utils::getChunksBetween($from, $to) as $vector2) {
             $x = $vector2->getFloorX();
@@ -101,7 +102,10 @@ class Pathfinder {
         }
         Server::getInstance()->getAsyncPool()->submitTask(new AsyncPathfinderTask(World::blockHash($from->getFloorX(), $from->getFloorY(), $from->getFloorZ()), World::blockHash($to->getFloorX(), $to->getFloorY(), $to->getFloorZ()), $world->getFolderName(), $timeout, igbinary_serialize($this->settings), ThreadSafeArray::fromArray(array_map(function(Rule $rule): string {
             return igbinary_serialize($rule);
-        }, $this->rules)), $chunkCacheLimit, ThreadSafeArray::fromArray($chunks), $closure));
+        }, $this->rules)), $chunkCacheLimit, ThreadSafeArray::fromArray($chunks), function(?PathResult $result) use ($closure): void {
+            $this->running = false;
+            ($closure)($result);
+        }));
     }
 
     public function isRunning(): bool{
