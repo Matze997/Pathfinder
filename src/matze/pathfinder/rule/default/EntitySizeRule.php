@@ -39,6 +39,7 @@ class EntitySizeRule extends Rule {
             }
             if($this->couldStandAt($down, $world, $cost)) {
                 $targetNode->y -= $yy;
+                $cost += $yy;
                 return true;
             }
         }
@@ -49,6 +50,7 @@ class EntitySizeRule extends Rule {
             }
             if($this->couldStandAt($targetNode->up($yy), $world, $cost)) {
                 $targetNode->y += $yy;
+                $cost += $yy;
                 return true;
             }
         }
