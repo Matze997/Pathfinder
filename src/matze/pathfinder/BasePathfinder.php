@@ -179,13 +179,13 @@ class BasePathfinder {
         }
         $distance = $vec1->distance($vec2);
         $rayPos = clone $vec1;
-        $direction = $vec2->subtractVector($vec1)->normalize();
+        $direction = $vec2->subtractVector($vec1)->normalize()->divide(2);
         if($distance < $direction->length()) {
             return true;
         }
         while($distance > $vec1->distance($rayPos)) {
             $cost = 0;
-            if(!$this->isNicePositionToStand($rayPos, $cost)) {
+            if(!$this->isNicePositionToStand($rayPos->round(), $cost)) {
                 return false;
             }
             $rayPos = $rayPos->addVector($direction);
