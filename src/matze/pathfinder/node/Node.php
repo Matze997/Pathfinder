@@ -55,4 +55,8 @@ class Node extends Vector3 {
     public static function fromVector3(Vector3 $vector3): Node {
         return new Node($vector3->getFloorX() + 0.5, $vector3->getFloorY(), $vector3->getFloorZ() + 0.5);
     }
+
+    public function manhattenDistance(Vector3 $vector3): float {
+        return abs($this->x - $vector3->x) + abs($this->y - $vector3->y) + abs($this->z - $vector3->z);
+    }
 }
