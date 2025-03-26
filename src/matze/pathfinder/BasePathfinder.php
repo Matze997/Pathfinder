@@ -108,8 +108,8 @@ class BasePathfinder {
                 }
                 if(!isset($this->openList[$node->getHash()]) || ($currentNode->getG() + $cost) < $node->getG()) {
                     $node->setG(($currentNode->getG() + $cost));
-                    $node->setH($node->distance($targetVector));
-                    $node->setParentNode($currentNode);
+					$node->setH($this->calculateSimpleHeuristic($node, $currentNode));
+					$node->setParentNode($currentNode);
                     $this->openList[$node->getHash()] = $node;
                     if($bestNode === null || $bestNode->getH() > $node->getH()) {
                         $bestNode = $node;
@@ -172,6 +172,21 @@ class BasePathfinder {
         asort($openList);
         return array_key_first($openList);
     }
+
+	protected function calculateSimpleHeuristic(Vector3 $a, Vector3 $b) : float{
+		$dx = abs($a->getX() - $b->getX());
+		// If your entities can move vertically (e.g., climb blocks, jump, or fly), include dy in the heuristic to account for vertical movement costs.
+		$dy = abs($a->getY() - $b->getY());
+		$dz = abs($a->getZ() - $b->getZ());
+
+		// Octile distance for X and Z axes
+		$minD = min($dx, $dz);
+		$maxD = max($dx, $dz);
+		$octileDistance = ($minD * sqrt(2)) + ($maxD - $minD);
+
+		// Add vertical distance (Y-axis) as a separate cost
+		return $octileDistance + $dy;
+	}
 
     protected function isClearBetweenPoints(Vector3 $vec1, Vector3 $vec2): bool {
         if(!$this->settings->isPathSmoothing() || $vec1->getFloorY() !== $vec2->getFloorY()) {
