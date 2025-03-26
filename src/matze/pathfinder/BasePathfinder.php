@@ -108,7 +108,7 @@ class BasePathfinder {
                 }
                 if(!isset($this->openList[$node->getHash()]) || ($currentNode->getG() + $cost) < $node->getG()) {
                     $node->setG(($currentNode->getG() + $cost));
-                    $node->setH($node->manhattenDistance($targetVector));
+                    $node->setH($node->distance($targetVector));
                     $node->setParentNode($currentNode);
                     $this->openList[$node->getHash()] = $node;
                     if($bestNode === null || $bestNode->getH() > $node->getH()) {
