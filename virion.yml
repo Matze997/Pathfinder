@@ -1,5 +1,5 @@
 name: libPathfinder
-version: 3.2.0-BETA
+version: 3.3.0-BETA
 api: 5.0.0
 antigen: matze\pathfinder
 author: Matze997

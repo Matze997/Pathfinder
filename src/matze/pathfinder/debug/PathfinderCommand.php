@@ -6,7 +6,10 @@ namespace matze\pathfinder\debug;
 
 use matze\pathfinder\Pathfinder;
 use matze\pathfinder\result\PathResult;
+use matze\pathfinder\rule\default\AdvancedEntitySizeRule;
 use matze\pathfinder\rule\default\EntitySizeRule;
+use matze\pathfinder\setting\distance\HeuristicDistanceCalculator;
+use matze\pathfinder\setting\distance\ManhattenDistanceCalculator;
 use matze\pathfinder\setting\Settings;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -32,7 +35,7 @@ class PathfinderCommand extends Command {
         $this->setPermission("command.pathfinder.use");
         $this->pathfinder = new Pathfinder([
             new EntitySizeRule(new EntitySizeInfo(2, 1)),
-        ], Settings::get()->setPathSmoothing(false)->setMaxTravelDistanceDown(2)->setMaxTravelDistanceUp(2));
+        ], Settings::get()->setPathSmoothing(true)->setMaxTravelDistanceDown(2)->setMaxTravelDistanceUp(1));
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args): void{
@@ -89,6 +92,16 @@ class PathfinderCommand extends Command {
                     $this->visualizePath($sender->getWorld(), $result);
                     $sender->sendMessage("Path found! Took ".round(microtime(true) - $ms, 5)." seconds.");
                 }, (float)($args[1] ?? 0.2), 64);
+                break;
+            }
+            case "heuristic": {
+                $this->pathfinder->getSettings()->setDistanceCalculator(new HeuristicDistanceCalculator());
+                $sender->sendMessage("Set distance calculator to 'Heuristic'!");
+                break;
+            }
+            case "manhatten": {
+                $this->pathfinder->getSettings()->setDistanceCalculator(new ManhattenDistanceCalculator());
+                $sender->sendMessage("Set distance calculator to 'Manhatten'!");
                 break;
             }
             default: {

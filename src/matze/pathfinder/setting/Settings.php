@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace matze\pathfinder\setting;
 
+use matze\pathfinder\setting\distance\DistanceCalculator;
+use matze\pathfinder\setting\distance\ManhattenDistanceCalculator;
+
 class Settings {
     private int $maxTravelDistanceUp = 1;
     private int $maxTravelDistanceDown = 1;
     private bool $pathSmoothing = true;
+    private DistanceCalculator $distanceCalculator;
 
     public static function get(): self {
         return new self();
@@ -47,5 +51,14 @@ class Settings {
 
     public function isPathSmoothing(): bool{
         return $this->pathSmoothing;
+    }
+
+    public function getDistanceCalculator(): DistanceCalculator{
+        return $this->distanceCalculator ??= new ManhattenDistanceCalculator();
+    }
+
+    public function setDistanceCalculator(DistanceCalculator $distanceCalculator): self {
+        $this->distanceCalculator = $distanceCalculator;
+        return $this;
     }
 }
